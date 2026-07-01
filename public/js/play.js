@@ -40,6 +40,8 @@ const els = {
   giveupConfirmYes: document.getElementById('giveupConfirmYes'),
   giveupConfirmNo: document.getElementById('giveupConfirmNo'),
   giveupOverlay: document.getElementById('giveupOverlay'),
+  giveupPill: document.getElementById('giveupPill'),
+  pillScore: document.getElementById('pillScore'),
   giveupName: document.getElementById('giveupName'),
   giveupScore: document.getElementById('giveupScore'),
   giveupTime: document.getElementById('giveupTime'),
@@ -49,7 +51,6 @@ const els = {
   giveupBoard: document.getElementById('giveupBoard'),
   giveupReplayBtn: document.getElementById('giveupReplayBtn'),
   giveupMinimizeBtn: document.getElementById('giveupMinimizeBtn'),
-  giveupReopenBtn: document.getElementById('giveupReopenBtn'),
 };
 
 els.replayBtn.href = '/play.html?level=' + encodeURIComponent(levelId);
@@ -273,6 +274,7 @@ async function giveUp() {
   els.totalCount.textContent = String(state.total);
   els.giveupName.textContent = nickname;
   els.giveupScore.textContent = `${state.found.size}/${state.total}`;
+  els.pillScore.textContent = `${state.found.size}/${state.total}`;
   els.giveupTime.textContent = fmtTime(elapsed);
   els.giveupMiss.textContent = state.misses;
   els.giveupHints.textContent = state.hints;
@@ -324,19 +326,15 @@ els.zoomInBtn.addEventListener('click', () => zoom && zoom.zoomIn());
 els.zoomOutBtn.addEventListener('click', () => zoom && zoom.zoomOut());
 els.zoomResetBtn.addEventListener('click', () => zoom && zoom.reset());
 
-els.giveupMinimizeBtn.addEventListener('click', () => {
-  els.giveupOverlay.classList.add('hidden');
-  els.giveupReopenBtn.classList.remove('hidden');
-});
-els.giveupReopenBtn.addEventListener('click', () => {
-  els.giveupOverlay.classList.remove('hidden');
-  els.giveupReopenBtn.classList.add('hidden');
-});
+function setGiveupMinimized(minimized) {
+  els.giveupOverlay.classList.toggle('minimized', minimized);
+}
+els.giveupMinimizeBtn.addEventListener('click', () => setGiveupMinimized(true));
+els.giveupPill.addEventListener('click', () => setGiveupMinimized(false));
+// Clicking the backdrop (only reachable while expanded, since the backdrop
+// itself goes non-interactive once minimized) also minimizes.
 els.giveupOverlay.addEventListener('click', (e) => {
-  if (e.target === els.giveupOverlay) {
-    els.giveupOverlay.classList.add('hidden');
-    els.giveupReopenBtn.classList.remove('hidden');
-  }
+  if (e.target === els.giveupOverlay) setGiveupMinimized(true);
 });
 
 els.boardBtn.addEventListener('click', async () => {

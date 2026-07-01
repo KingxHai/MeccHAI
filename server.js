@@ -164,7 +164,12 @@ function removeUpload(imageUrl) {
 
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
-app.use(express.static(path.join(__dirname, 'public')));
+// Never let browsers/proxies serve a stale copy of the app itself after a
+// deploy — always revalidate with the server first (still cheap: a 304 when
+// unchanged).
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
+}));
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),

@@ -38,11 +38,12 @@ it's shared across all visitors and devices.
   opacity. Clicking empty space shows a small "miss" ripple.
 - **Give up** — ends the run early (with an in-app confirmation prompt),
   reveals every object you hadn't found yet in a **red** box, and shows your
-  final score (found/total). The results card can be **minimized** to a small
-  "Show results" button so you can freely inspect the revealed board (zoom
-  included) before reopening it. Gave-up runs are still added to the
-  scoreboard as a **failed attempt** — ranked below completed runs, showing
-  `found/total` and a red **FAILED** tag instead of a time.
+  final score (found/total). Click **"View board"** (or the backdrop) to
+  collapse the results card down to a small tab, so you can freely inspect the
+  revealed board — zoom included — then tap the tab to bring the results back.
+  Gave-up runs are still added to the scoreboard as a **failed attempt** —
+  ranked below completed runs, showing `found/total` and a red **FAILED** tag
+  instead of a time.
 
 ### Create a level (`/submit.html`)
 Any player can create a level: upload an image, name it, and drag rectangles over

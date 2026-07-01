@@ -89,42 +89,46 @@
     </div>
   </div>
 
-  <!-- Give-up overlay -->
+  <!-- Give-up overlay: minimizes to a small corner tab instead of a separate
+       floating button, so there's a single element and state to reason about. -->
   <div class="overlay hidden" id="giveupOverlay">
-    <div class="card">
-      <div class="topbar">
-        <h1 style="margin:0;">🏳️ You gave up</h1>
-        <button class="btn-secondary" id="giveupMinimizeBtn" title="Hide this and look at the board">▁ Minimize</button>
-      </div>
-      <p class="subtitle">Nice try, <strong id="giveupName"></strong>! The missed objects are marked in red.</p>
-      <div class="row space">
-        <span class="hint">Score</span>
-        <span class="stat-value" id="giveupScore">0/0</span>
-      </div>
-      <div class="row space">
-        <span class="hint">Your time</span>
-        <span class="stat-value" id="giveupTime" style="font-size:1.1rem;">00:00:00</span>
-      </div>
-      <div class="row space">
-        <span class="hint">Misclicks</span>
-        <span class="stat-value" id="giveupMiss" style="font-size:1.1rem;">0</span>
-      </div>
-      <div class="row space">
-        <span class="hint">Hints used</span>
-        <span class="stat-value" id="giveupHints" style="font-size:1.1rem;">0</span>
-      </div>
-      <div id="giveupMsg" class="msg ok"></div>
-      <div class="divider"></div>
-      <h2>🏆 Scoreboard</h2>
-      <div id="giveupBoard"></div>
-      <div class="row" style="margin-top:16px;">
-        <a class="btn grow" href="/play.html" id="giveupReplayBtn">Try again</a>
-        <a class="btn btn-secondary grow" href="/browse.html">Other levels</a>
+    <div class="card" id="giveupCard">
+      <button class="minimized-pill" id="giveupPill">
+        🏳️ <span id="pillScore">0/0</span> found — click to view results
+      </button>
+      <div class="giveup-body">
+        <div class="topbar">
+          <h1 style="margin:0; font-size:1.4rem;">🏳️ You gave up</h1>
+          <button class="btn-secondary" id="giveupMinimizeBtn" title="Hide this so you can look at the revealed board">👀 View board</button>
+        </div>
+        <p class="subtitle">Nice try, <strong id="giveupName"></strong>! The missed objects are marked in red.</p>
+        <div class="row space">
+          <span class="hint">Score</span>
+          <span class="stat-value" id="giveupScore">0/0</span>
+        </div>
+        <div class="row space">
+          <span class="hint">Your time</span>
+          <span class="stat-value" id="giveupTime" style="font-size:1.1rem;">00:00:00</span>
+        </div>
+        <div class="row space">
+          <span class="hint">Misclicks</span>
+          <span class="stat-value" id="giveupMiss" style="font-size:1.1rem;">0</span>
+        </div>
+        <div class="row space">
+          <span class="hint">Hints used</span>
+          <span class="stat-value" id="giveupHints" style="font-size:1.1rem;">0</span>
+        </div>
+        <div id="giveupMsg" class="msg ok"></div>
+        <div class="divider"></div>
+        <h2>🏆 Scoreboard</h2>
+        <div id="giveupBoard"></div>
+        <div class="row" style="margin-top:16px;">
+          <a class="btn grow" href="/play.html" id="giveupReplayBtn">Try again</a>
+          <a class="btn btn-secondary grow" href="/browse.html">Other levels</a>
+        </div>
       </div>
     </div>
   </div>
-
-  <button class="btn btn-secondary hidden" id="giveupReopenBtn" style="position:fixed; bottom:18px; right:18px; z-index:20;">📋 Show results</button>
 
   <!-- Scoreboard overlay -->
   <div class="overlay hidden" id="boardOverlay">

@@ -321,6 +321,37 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .hidden { display: none !important; }
 
+/* Minimized state: the overlay's backdrop goes away and stops blocking
+   clicks, and its card collapses to a small clickable tab in the corner —
+   so the board underneath (with revealed markers) becomes fully visible and
+   interactive (zoom included), while one tap brings the full card back. */
+.minimized-pill { display: none; }
+.overlay.minimized {
+  background: transparent;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 16px;
+  pointer-events: none;
+}
+.overlay.minimized .card {
+  width: auto;
+  max-width: none;
+  padding: 10px 18px;
+  pointer-events: auto;
+}
+.overlay.minimized .giveup-body { display: none; }
+.overlay.minimized .minimized-pill {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 0;
+}
+
 .badge {
   display: inline-block; padding: 2px 10px; border-radius: 999px;
   background: var(--panel-2); border: 1px solid var(--border);
