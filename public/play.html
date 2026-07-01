@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Hunting… | Hidden Object Hunt</title>
   <link rel="icon" href="/icon.png" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
+<body class="play-body">
   <div class="hud">
     <div class="stat">
       <div class="stat-label">Found</div>
@@ -26,14 +26,22 @@
       <div class="stat-value" id="levelName" style="font-size:1.1rem;">—</div>
     </div>
     <div class="grow"></div>
-    <button class="btn-secondary" id="boardBtn">🏆 Scoreboard</button>
+    <button class="btn-secondary" id="hintBtn">💡 Hint</button>
+    <div class="zoom-controls">
+      <button class="btn-secondary" id="zoomOutBtn" title="Zoom out">−</button>
+      <button class="btn-secondary" id="zoomResetBtn" title="Reset zoom">⟲</button>
+      <button class="btn-secondary" id="zoomInBtn" title="Zoom in">＋</button>
+    </div>
+    <button class="btn-secondary" id="boardBtn">🏆</button>
     <a class="btn btn-secondary" href="/browse.html">Levels</a>
   </div>
 
-  <div class="stage-wrap">
-    <div class="stage" id="stage">
-      <img id="gameImage" alt="Find the hidden objects" />
+  <div class="zoom-viewport" id="viewport">
+    <div class="zoom-stage" id="stage">
+      <img id="gameImage" alt="Find the hidden objects" draggable="false" />
     </div>
+    <div class="hint-banner hidden" id="hintBanner"></div>
+    <div class="zoom-hint" id="zoomTip">Pinch or scroll to zoom · drag to pan</div>
   </div>
 
   <!-- Win overlay -->
@@ -71,6 +79,7 @@
     </div>
   </div>
 
+  <script src="/js/zoom.js"></script>
   <script src="/js/play.js"></script>
 </body>
 </html>

@@ -89,6 +89,7 @@ function cleanObjects(objects) {
   return (Array.isArray(objects) ? objects : []).map((o, i) => ({
     id: 'o' + (i + 1),
     label: String(o.label || '').slice(0, 60),
+    hint: String(o.hint || '').slice(0, 200),
     x: Math.min(Math.max(Number(o.x) || 0, 0), 1),
     y: Math.min(Math.max(Number(o.y) || 0, 0), 1),
     w: Math.min(Math.max(Number(o.w) || 0, 0), 1),
@@ -253,6 +254,19 @@ app.post('/api/score', (req, res) => {
 
 app.get('/api/scoreboard/:levelId', (req, res) => {
   res.json(levelScoreboard(req.params.levelId));
+});
+
+// Ask for a hint. Body: { levelId, foundIds: [] }. Returns the hint text for a
+// random not-yet-found object that has one. Kept server-side so hints aren't all
+// exposed up front.
+app.post('/api/hint', (req, res) => {
+  const level = getLevels().find((l) => l.id === req.body.levelId && l.status === 'approved');
+  if (!level) return res.status(404).json({ error: 'Level not found.' });
+  const found = new Set(Array.isArray(req.body.foundIds) ? req.body.foundIds : []);
+  const candidates = level.objects.filter((o) => !found.has(o.id) && o.hint && o.hint.trim());
+  if (!candidates.length) return res.json({ hasHint: false });
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  res.json({ hasHint: true, hint: pick.hint, remaining: candidates.length });
 });
 
 // Public image upload (used by both submission and admin flows). Handles HEIC.

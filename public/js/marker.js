@@ -35,24 +35,32 @@ window.createMarkerTool = function ({ stage, img, list, count }) {
     }
     objects.forEach((o, i) => {
       const li = document.createElement('li');
-      const left = document.createElement('div');
-      left.className = 'row';
-      left.style.gap = '10px';
-      left.innerHTML = `<strong>#${i + 1}</strong>`;
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Optional name (only you see this)';
-      input.value = o.label || '';
-      input.style.minWidth = '220px';
-      input.addEventListener('input', () => { o.label = input.value; });
-      left.appendChild(input);
+
+      const fields = document.createElement('div');
+      fields.className = 'obj-fields';
+      fields.innerHTML = `<strong class="obj-num">#${i + 1}</strong>`;
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = 'Optional name (only you see this)';
+      nameInput.value = o.label || '';
+      nameInput.addEventListener('input', () => { o.label = nameInput.value; });
+
+      const hintInput = document.createElement('input');
+      hintInput.type = 'text';
+      hintInput.placeholder = 'Optional hint (shown to players who ask)';
+      hintInput.value = o.hint || '';
+      hintInput.addEventListener('input', () => { o.hint = hintInput.value; });
+
+      fields.appendChild(nameInput);
+      fields.appendChild(hintInput);
 
       const del = document.createElement('button');
       del.className = 'del';
       del.textContent = '✕ Remove';
       del.addEventListener('click', () => { objects.splice(i, 1); render(); });
 
-      li.appendChild(left);
+      li.appendChild(fields);
       li.appendChild(del);
       list.appendChild(li);
     });
@@ -95,7 +103,7 @@ window.createMarkerTool = function ({ stage, img, list, count }) {
     drawing.el.remove();
     drawing = null;
     if (box && box.w > 0.01 && box.h > 0.01) {
-      objects.push({ label: '', ...box });
+      objects.push({ label: '', hint: '', ...box });
       render();
     }
   }
@@ -106,7 +114,7 @@ window.createMarkerTool = function ({ stage, img, list, count }) {
     getObjects: () => objects,
     setObjects: (arr) => {
       objects = (arr || []).map((o) => ({
-        label: o.label || '', x: o.x, y: o.y, w: o.w, h: o.h,
+        label: o.label || '', hint: o.hint || '', x: o.x, y: o.y, w: o.w, h: o.h,
       }));
       render();
     },

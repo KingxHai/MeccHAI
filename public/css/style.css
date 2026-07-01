@@ -127,7 +127,63 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .hud .grow { min-width: 1px; }
 
-/* ---------- game stage ---------- */
+/* ---------- play screen (full-viewport, zoomable) ---------- */
+.play-body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+.play-body .hud { position: static; flex: 0 0 auto; }
+
+.zoom-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  background: #0c0e1a;
+  touch-action: none;          /* we handle pinch/drag ourselves */
+  cursor: crosshair;
+}
+.zoom-stage {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  line-height: 0;
+}
+.zoom-stage img { display: block; user-select: none; -webkit-user-drag: none; }
+
+.zoom-controls { display: inline-flex; gap: 6px; }
+.zoom-controls button { min-width: 40px; padding: 8px 10px; font-size: 1.1rem; line-height: 1; }
+
+.hint-banner {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  background: rgba(26, 31, 54, 0.95);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow);
+  z-index: 15;
+}
+.zoom-hint {
+  position: absolute;
+  bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  color: var(--muted);
+  font-size: 0.8rem;
+  background: rgba(12, 14, 26, 0.7);
+  padding: 5px 12px;
+  border-radius: 999px;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* marking list: name + hint fields stacked */
+.obj-fields { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; }
+.obj-fields .obj-num { flex: 0 0 auto; }
+.obj-fields input { flex: 1 1 200px; min-width: 160px; }
+
+/* ---------- admin/submit marking stage ---------- */
 .stage-wrap {
   padding: 18px;
   overflow: auto;

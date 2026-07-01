@@ -22,6 +22,11 @@ it's shared across all visitors and devices.
   early, to keep the challenge).
 - **Timer** in `HH:MM:SS` (`00:00:00`) that starts when the image loads.
 - **Misclicks** are counted and shown live.
+- **Zoom & pan** — zoom buttons plus mouse wheel (desktop) and pinch (mobile),
+  and drag to pan when zoomed in. Tapping still finds objects accurately at any
+  zoom level.
+- **Hint button** — asks the server for a clue for one not-yet-found object
+  (only for objects the creator gave a hint).
 - **Per-level scoreboard** showing `nickname · time · misses`, fastest first
   (ties broken by fewest misses), keeping only each player's **best** run, with
   your own run highlighted.
@@ -30,8 +35,9 @@ it's shared across all visitors and devices.
 
 ### Create a level (`/submit.html`)
 Any player can create a level: upload an image, name it, and drag rectangles over
-the hidden objects. Submissions are held for **admin approval** before they appear
-in the browse list. Marking works with mouse and touch.
+the hidden objects. Each object can also have an optional **hint** (shown to
+players who press the Hint button). Submissions are held for **admin approval**
+before they appear in the browse list. Marking works with mouse and touch.
 
 ### Admin UI (`/admin.html`)
 - Password-protected.
@@ -148,6 +154,7 @@ public/
   admin.html         Admin panel — approve/reject, create, delete levels
   css/style.css      Shared styles
   js/marker.js       Reusable drag-to-mark tool (mouse + touch)
+  js/zoom.js         Pan + zoom controller for the play image
   js/play.js         Gameplay logic
   js/submit.js       Player submission logic
   js/admin.js        Admin logic (approve/reject/create/delete)
@@ -164,6 +171,7 @@ data/                levels.json + scoreboard.json (gitignored)
 | POST   | `/api/check`                        | —     | Check a normalized `{levelId,x,y}` click         |
 | POST   | `/api/score`                        | —     | Submit a completed run (incl. misses)            |
 | GET    | `/api/scoreboard/:levelId`          | —     | Best run per player for a level                  |
+| POST   | `/api/hint`                         | —     | Get a hint for an unfound object (if one exists) |
 | POST   | `/api/upload`                       | —     | Upload an image (handles HEIC)                    |
 | POST   | `/api/levels/submit`                | —     | Submit a player-made level (pending approval)    |
 | POST   | `/api/admin/login`                  | admin | Verify the admin password                        |
