@@ -12,6 +12,9 @@ const els = {
   img: document.getElementById('markImage'),
   objCount: document.getElementById('objCount'),
   objList: document.getElementById('objList'),
+  markZoomInBtn: document.getElementById('markZoomInBtn'),
+  markZoomOutBtn: document.getElementById('markZoomOutBtn'),
+  markZoomResetBtn: document.getElementById('markZoomResetBtn'),
   submitBtn: document.getElementById('submitBtn'),
   clearBtn: document.getElementById('clearBtn'),
   submitMsg: document.getElementById('submitMsg'),
@@ -22,6 +25,9 @@ const tool = createMarkerTool({
   stage: els.stage, img: els.img, list: els.objList, count: els.objCount,
 });
 tool.render();
+els.markZoomInBtn.addEventListener('click', () => tool.zoomIn());
+els.markZoomOutBtn.addEventListener('click', () => tool.zoomOut());
+els.markZoomResetBtn.addEventListener('click', () => tool.zoomReset());
 
 els.uploadBtn.addEventListener('click', async () => {
   const file = els.fileInput.files[0];
@@ -42,6 +48,7 @@ els.uploadBtn.addEventListener('click', async () => {
     imageUrl = data.imageUrl;
     tool.clear();
     els.img.src = imageUrl;
+    tool.fit();
     els.stage.style.display = 'inline-block';
     els.emptyState.style.display = 'none';
     els.uploadMsg.textContent = 'Uploaded! Now drag rectangles over the hidden objects.';

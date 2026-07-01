@@ -187,6 +187,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .stage-wrap {
   padding: 18px;
   overflow: auto;
+  max-height: 65vh;
 }
 .stage {
   position: relative;

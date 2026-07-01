@@ -39,12 +39,15 @@ it's shared across all visitors and devices.
 Any player can create a level: upload an image, name it, and drag rectangles over
 the hidden objects. Each object can also have an optional **hint** (shown to
 players who press the Hint button). Submissions are held for **admin approval**
-before they appear in the browse list. Marking works with mouse and touch.
+before they appear in the browse list. Marking works with mouse and touch, and
+can be **zoomed in** for precise selection (buttons, Ctrl/Cmd + scroll, or
+pinch on touch — scroll/drag the scrollbar to pan while zoomed in).
 
 ### Admin UI (`/admin.html`)
 - Password-protected.
 - **Approve / reject** pending player submissions.
-- **Create levels** directly (auto-approved): upload, name, and mark objects.
+- **Create levels** directly (auto-approved): upload, name, and mark objects
+  — zoomable for precise selection, same as the submission form.
 - **Edit** any live level — click it to change its name, image, and hidden
   objects/hints, or add/remove objects.
 - **Delete** any level, or **reset** an individual level's scoreboard.
@@ -158,7 +161,7 @@ public/
   submit.html        Player level creation (upload, name, mark) — pending approval
   admin.html         Admin panel — approve/reject, create, delete levels
   css/style.css      Shared styles
-  js/marker.js       Reusable drag-to-mark tool (mouse + touch)
+  js/marker.js       Reusable drag-to-mark tool (mouse + touch + zoom)
   js/zoom.js         Pan + zoom controller for the play image
   js/play.js         Gameplay logic
   js/submit.js       Player submission logic

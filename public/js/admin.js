@@ -23,6 +23,9 @@ const els = {
   img: document.getElementById('markImage'),
   objCount: document.getElementById('objCount'),
   objList: document.getElementById('objList'),
+  markZoomInBtn: document.getElementById('markZoomInBtn'),
+  markZoomOutBtn: document.getElementById('markZoomOutBtn'),
+  markZoomResetBtn: document.getElementById('markZoomResetBtn'),
   createBtn: document.getElementById('createBtn'),
   clearBtn: document.getElementById('clearBtn'),
   cancelEditBtn: document.getElementById('cancelEditBtn'),
@@ -76,6 +79,9 @@ function enterPanel() {
   els.adminPanel.classList.remove('hidden');
   tool = createMarkerTool({ stage: els.stage, img: els.img, list: els.objList, count: els.objCount });
   tool.render();
+  els.markZoomInBtn.addEventListener('click', () => tool.zoomIn());
+  els.markZoomOutBtn.addEventListener('click', () => tool.zoomOut());
+  els.markZoomResetBtn.addEventListener('click', () => tool.zoomReset());
   loadLevels();
 }
 
@@ -152,6 +158,7 @@ function enterEditMode(level) {
   els.name.value = level.name;
   tool.setObjects(level.objects);
   els.img.src = level.imageUrl;
+  tool.fit();
   els.stage.style.display = 'inline-block';
   els.emptyState.style.display = 'none';
   els.editorTitle.textContent = `✏️ Editing "${level.name}"`;
@@ -194,6 +201,7 @@ els.uploadBtn.addEventListener('click', async () => {
     imageUrl = data.imageUrl;
     tool.clear();
     els.img.src = imageUrl;
+    tool.fit();
     els.stage.style.display = 'inline-block';
     els.emptyState.style.display = 'none';
     els.uploadMsg.textContent = 'Uploaded! Drag rectangles over the hidden objects.';
