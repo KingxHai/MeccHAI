@@ -97,6 +97,14 @@ Then open:
 ADMIN_PASSWORD='your-strong-password' npm start
 ```
 
+### Updates and caching
+
+Every process start stamps a fresh version onto the app's own JS/CSS URLs
+(e.g. `/js/play.js?v=abc123`), so a browser (or proxy) that cached an old
+script can never accidentally keep using it after you deploy a new image —
+the URL itself changes. After updating the container, a normal page reload
+is enough; no need to hunt for a hard-refresh.
+
 ## Run with Docker
 
 The whole app is a single container. Persistent data (uploaded images, game

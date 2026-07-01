@@ -164,10 +164,44 @@ function removeUpload(imageUrl) {
 
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
-// Never let browsers/proxies serve a stale copy of the app itself after a
-// deploy — always revalidate with the server first (still cheap: a 304 when
-// unchanged).
-app.use(express.static(path.join(__dirname, 'public'), {
+
+// Cache-busting: relying on Cache-Control alone means a browser (or an
+// in-between proxy) that already cached an old script keeps using it even
+// after a deploy, until something prompts a real revalidation — which is
+// exactly the kind of stale-JS-with-fresh-HTML mismatch that's bitten this
+// app before. Instead, every process start gets a version stamp, and each
+// HTML page's local <script>/<link> URLs get "?v=<stamp>" appended at serve
+// time. A changed URL can never be served from a stale cache, full stop —
+// no reliance on any cache header being honored correctly.
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const ASSET_VERSION = Date.now().toString(36);
+const htmlCache = new Map();
+
+function serveVersionedHtml(fileName) {
+  return (req, res) => {
+    if (!htmlCache.has(fileName)) {
+      const raw = fs.readFileSync(path.join(PUBLIC_DIR, fileName), 'utf8');
+      const versioned = raw.replace(
+        /((?:src|href)=")(\/(?:js|css)\/[^"]+)"/g,
+        (match, prefix, url) => `${prefix}${url}?v=${ASSET_VERSION}"`
+      );
+      htmlCache.set(fileName, versioned);
+    }
+    res.set('Cache-Control', 'no-cache');
+    res.type('html').send(htmlCache.get(fileName));
+  };
+}
+
+const HTML_PAGES = ['index.html', 'browse.html', 'play.html', 'submit.html', 'admin.html'];
+for (const page of HTML_PAGES) app.get('/' + page, serveVersionedHtml(page));
+app.get('/', serveVersionedHtml('index.html'));
+
+// Never let browsers/proxies serve a stale copy of the app's JS/CSS/images
+// after a deploy — always revalidate with the server first (still cheap: a
+// 304 when unchanged). The version-stamped URLs above are the primary
+// defense; this is a backstop for any request that reaches a static file
+// directly without going through a versioned HTML page.
+app.use(express.static(PUBLIC_DIR, {
   setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
 }));
 
