@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.log
+.DS_Store
+
+# Never bake runtime data into the image
+uploads/*
+data/*
+!uploads/.gitkeep
+!data/.gitkeep
+
+# Docs / CI not needed at runtime
+README.md
+.github
+unraid

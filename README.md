@@ -58,6 +58,61 @@ Then open:
 ADMIN_PASSWORD='your-strong-password' npm start
 ```
 
+## Run with Docker
+
+The whole app is a single container. Persistent data (uploaded images, game
+config, scoreboard) lives in two mounted folders so nothing is lost on restart.
+
+### Docker (one-liner)
+
+```bash
+docker run -d --name hidden-object-hunt \
+  -p 3000:3000 \
+  -e ADMIN_PASSWORD='your-strong-password' \
+  -v "$PWD/data:/app/data" \
+  -v "$PWD/uploads:/app/uploads" \
+  --restart unless-stopped \
+  ghcr.io/kingxhai/mecchai:latest
+```
+
+### Docker Compose
+
+```bash
+docker compose up -d      # edit ADMIN_PASSWORD in docker-compose.yml first
+```
+
+Build locally instead of pulling: `docker build -t mecchai .`
+
+### Unraid
+
+A ready-made Community-Applications template lives at
+[`unraid/mecchai.xml`](unraid/mecchai.xml).
+
+**Easiest:** in Unraid go to **Docker → Add Container**, and in the *Template*
+field paste:
+
+```
+https://raw.githubusercontent.com/kingxhai/mecchai/main/unraid/mecchai.xml
+```
+
+Then just set the **Admin Password** and click **Apply**. It maps:
+
+| Setting  | Container path | Default host path                    |
+| -------- | -------------- | ------------------------------------ |
+| Data     | `/app/data`    | `/mnt/user/appdata/mecchai/data`     |
+| Uploads  | `/app/uploads` | `/mnt/user/appdata/mecchai/uploads`  |
+| WebUI    | port `3000`    | choose any host port                 |
+
+Open the WebUI at `http://<unraid-ip>:3000/`, and the admin panel at
+`/admin.html`.
+
+> The image is published to **GHCR** automatically by the
+> [`docker-publish`](.github/workflows/docker-publish.yml) GitHub Action on
+> every push to the default branch (and on version tags). Trigger it manually
+> from the Actions tab, or merge to `main`, to produce `ghcr.io/kingxhai/mecchai:latest`.
+> Make the package **public** once (repo → Packages → package → Package settings)
+> so Unraid can pull it without a login.
+
 ## How to run a hunt
 
 1. Go to `/admin.html` and log in.

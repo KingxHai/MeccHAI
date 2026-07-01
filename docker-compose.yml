@@ -1,0 +1,19 @@
+# Run locally or via Portainer:  docker compose up -d
+# On Unraid, prefer the template in unraid/mecchai.xml for a UI-driven install.
+services:
+  hidden-object-hunt:
+    # Build locally, or pull the prebuilt image published by GitHub Actions:
+    #   image: ghcr.io/kingxhai/mecchai:latest
+    build: .
+    image: ghcr.io/kingxhai/mecchai:latest
+    container_name: hidden-object-hunt
+    ports:
+      - "3000:3000"
+    environment:
+      # CHANGE THIS before exposing the site.
+      ADMIN_PASSWORD: "changeme"
+      PORT: "3000"
+    volumes:
+      - ./data:/app/data          # game config + scoreboard (persistent)
+      - ./uploads:/app/uploads    # uploaded images (persistent)
+    restart: unless-stopped

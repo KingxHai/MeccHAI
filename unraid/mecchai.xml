@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Hidden-Object-Hunt</Name>
+  <Repository>ghcr.io/kingxhai/mecchai:latest</Repository>
+  <Registry>https://github.com/kingxhai/mecchai/pkgs/container/mecchai</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/kingxhai/mecchai/issues</Support>
+  <Project>https://github.com/kingxhai/mecchai</Project>
+  <Overview>A hidden-object game website. As admin you upload a full-quality picture and mark the spots where objects are hidden. Visitors enter a nickname and race to find every object, with a live score (found/total), an HH:MM:SS timer, and a shared scoreboard of nickname and time. Uploaded images, the game config and the scoreboard are stored in the mapped Data and Uploads folders.</Overview>
+  <Category>GameServers: MediaApp:Other:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/kingxhai/mecchai/main/unraid/mecchai.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/kingxhai/mecchai/main/public/icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="3000" Default="3000" Mode="tcp" Description="Port for the website" Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Admin Password" Target="ADMIN_PASSWORD" Default="changeme" Mode="" Description="Password for the /admin.html setup panel. CHANGE THIS." Type="Variable" Display="always" Required="true" Mask="true">changeme</Config>
+  <Config Name="Data (game + scoreboard)" Target="/app/data" Default="/mnt/user/appdata/mecchai/data" Mode="rw" Description="Persistent storage for the game config and scoreboard." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/mecchai/data</Config>
+  <Config Name="Uploads (images)" Target="/app/uploads" Default="/mnt/user/appdata/mecchai/uploads" Mode="rw" Description="Persistent storage for uploaded full-quality images." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/mecchai/uploads</Config>
+</Container>
