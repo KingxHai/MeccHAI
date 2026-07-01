@@ -4,7 +4,7 @@ name: Publish Docker image
 # so Unraid (and anyone) can pull a prebuilt image instead of building it.
 on:
   push:
-    branches: [main, master, "claude/hidden-object-game-264kln"]
+    branches: [main, master]
     tags: ["v*"]
   workflow_dispatch:
 
