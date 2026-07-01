@@ -12,7 +12,7 @@
   <div class="center-screen" id="loginScreen">
     <div class="card">
       <h1>🔐 Admin login</h1>
-      <p class="subtitle">Enter the admin password to set up a hunt.</p>
+      <p class="subtitle">Enter the admin password to manage levels.</p>
       <form id="loginForm">
         <label for="password">Password</label>
         <input type="password" id="password" autocomplete="current-password" required />
@@ -27,54 +27,60 @@
   <!-- Admin panel -->
   <div class="container hidden" id="adminPanel">
     <div class="topbar">
-      <h1>🛠️ Hunt setup</h1>
+      <h1>🛠️ Manage levels</h1>
       <div class="row">
-        <a class="btn btn-secondary" href="/index.html">View game</a>
+        <a class="btn btn-secondary" href="/browse.html">View game</a>
         <button class="btn-secondary" id="logoutBtn">Log out</button>
       </div>
     </div>
 
+    <!-- Pending submissions -->
     <div class="card wide">
-      <h2>1. Upload an image (full quality)</h2>
-      <p class="hint">JPEG/PNG are stored as-is — no compression. Up to 50&nbsp;MB. Apple
-        <strong>HEIC/HEIF</strong> photos are auto-converted to high-quality JPEG so every browser can show them.</p>
+      <div class="row space">
+        <h2 style="margin:0;">⏳ Pending approval</h2>
+        <span class="badge">Waiting: <strong id="pendingCount">0</strong></span>
+      </div>
+      <div id="pendingList" class="admin-list"></div>
+    </div>
+
+    <!-- Approved levels -->
+    <div class="card wide" style="margin-top:18px;">
+      <h2>✅ Live levels</h2>
+      <div id="approvedList" class="admin-list"></div>
+    </div>
+
+    <!-- Create a level -->
+    <div class="card wide" style="margin-top:18px;">
+      <h2>➕ Create a level (auto-approved)</h2>
+      <label for="levelName">Level name</label>
+      <input type="text" id="levelName" maxlength="60" placeholder="e.g. The Kitchen" autocomplete="off" />
+      <p class="hint" style="margin-top:14px;">Full quality; HEIC/HEIF auto-converted to JPEG. Up to 50&nbsp;MB.</p>
       <div class="row">
         <input type="file" id="fileInput" accept="image/*,.heic,.heif" class="grow" />
         <button id="uploadBtn">Upload</button>
       </div>
       <div id="uploadMsg" class="msg"></div>
-    </div>
 
-    <div class="card wide" style="margin-top:18px;">
-      <div class="row space">
-        <h2 style="margin:0;">2. Mark the hidden objects</h2>
+      <div class="row space" style="margin-top:16px;">
+        <h2 style="margin:0;font-size:1rem;">Mark hidden objects</h2>
         <span class="badge">Marked: <strong id="objCount">0</strong></span>
       </div>
-      <p class="hint">
-        Drag a rectangle over each hidden object on the image below. Give it an optional name,
-        then click <em>Save hunt</em>. Players will need to click inside these areas to find them.
-      </p>
-
       <div class="stage-wrap" style="border:1px solid var(--border); border-radius:12px; background:#0c0e1a;">
         <div id="emptyState" class="hint" style="padding:20px;">Upload an image first to start marking.</div>
         <div class="stage" id="stage" style="display:none;">
-          <img id="adminImage" alt="Marking surface" draggable="false" />
+          <img id="markImage" alt="Marking surface" draggable="false" />
         </div>
       </div>
-
-      <h2 style="margin-top:20px;">Marked objects</h2>
-      <ul class="list" id="objList"></ul>
-
-      <div class="row" style="margin-top:18px;">
-        <button class="btn-success" id="saveBtn">💾 Save hunt</button>
-        <button class="btn-secondary" id="clearBtn">Clear all marks</button>
-        <div class="grow"></div>
-        <button class="btn-danger" id="resetBoardBtn">Reset scoreboard</button>
+      <ul class="list" id="objList" style="margin-top:14px;"></ul>
+      <div class="row" style="margin-top:14px;">
+        <button class="btn-success" id="createBtn">💾 Create level</button>
+        <button class="btn-secondary" id="clearBtn">Clear marks</button>
       </div>
-      <div id="saveMsg" class="msg"></div>
+      <div id="createMsg" class="msg"></div>
     </div>
   </div>
 
+  <script src="/js/marker.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

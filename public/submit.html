@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a level | Hidden Object Hunt</title>
+  <link rel="icon" href="/icon.png" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <h1>➕ Create a level</h1>
+      <a class="btn btn-secondary" href="/browse.html">← Back to levels</a>
+    </div>
+    <p class="subtitle">Upload an image, name it, and mark where the hidden objects are.
+      An admin approves new levels before they appear in the list.</p>
+
+    <div class="card wide">
+      <h2>1. Name &amp; image</h2>
+      <label for="levelName">Level name</label>
+      <input type="text" id="levelName" maxlength="60" placeholder="e.g. Grandma's Attic" autocomplete="off" />
+      <p class="hint" style="margin-top:14px;">JPEG/PNG stored as-is (up to 50&nbsp;MB). Apple HEIC/HEIF photos are auto-converted to JPEG.</p>
+      <div class="row">
+        <input type="file" id="fileInput" accept="image/*,.heic,.heif" class="grow" />
+        <button id="uploadBtn">Upload</button>
+      </div>
+      <div id="uploadMsg" class="msg"></div>
+    </div>
+
+    <div class="card wide" style="margin-top:18px;">
+      <div class="row space">
+        <h2 style="margin:0;">2. Mark the hidden objects</h2>
+        <span class="badge">Marked: <strong id="objCount">0</strong></span>
+      </div>
+      <p class="hint">Drag a rectangle over each hidden object. Players will need to click inside these areas to find them.</p>
+
+      <div class="stage-wrap" style="border:1px solid var(--border); border-radius:12px; background:#0c0e1a;">
+        <div id="emptyState" class="hint" style="padding:20px;">Upload an image first to start marking.</div>
+        <div class="stage" id="stage" style="display:none;">
+          <img id="markImage" alt="Marking surface" draggable="false" />
+        </div>
+      </div>
+
+      <h2 style="margin-top:20px;">Marked objects</h2>
+      <ul class="list" id="objList"></ul>
+
+      <div class="row" style="margin-top:18px;">
+        <button class="btn-success" id="submitBtn">📨 Submit for approval</button>
+        <button class="btn-secondary" id="clearBtn">Clear all marks</button>
+      </div>
+      <div id="submitMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <script src="/js/marker.js"></script>
+  <script src="/js/submit.js"></script>
+</body>
+</html>

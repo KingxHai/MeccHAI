@@ -1,0 +1,116 @@
+'use strict';
+
+// Reusable rectangle-marking tool for defining hidden objects on an image.
+// Works with mouse and touch via Pointer Events.
+//
+//   const tool = createMarkerTool({ stage, img, list, count });
+//   tool.getObjects();           // -> [{ label, x, y, w, h }]  (normalized 0..1)
+//   tool.setObjects(existing);   // load existing marks
+//   tool.clear();
+window.createMarkerTool = function ({ stage, img, list, count }) {
+  let objects = [];
+  let drawing = null;
+
+  function render() {
+    if (count) count.textContent = objects.length;
+
+    // Draw boxes over the image.
+    stage.querySelectorAll('.obj-box').forEach((n) => n.remove());
+    objects.forEach((o, i) => {
+      const box = document.createElement('div');
+      box.className = 'obj-box';
+      Object.assign(box.style, {
+        left: o.x * 100 + '%', top: o.y * 100 + '%',
+        width: o.w * 100 + '%', height: o.h * 100 + '%',
+      });
+      box.innerHTML = `<span class="obj-index">${i + 1}</span>`;
+      stage.appendChild(box);
+    });
+
+    if (!list) return;
+    list.innerHTML = '';
+    if (!objects.length) {
+      list.innerHTML = '<li class="hint" style="justify-content:flex-start;">No objects marked yet.</li>';
+      return;
+    }
+    objects.forEach((o, i) => {
+      const li = document.createElement('li');
+      const left = document.createElement('div');
+      left.className = 'row';
+      left.style.gap = '10px';
+      left.innerHTML = `<strong>#${i + 1}</strong>`;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Optional name (only you see this)';
+      input.value = o.label || '';
+      input.style.minWidth = '220px';
+      input.addEventListener('input', () => { o.label = input.value; });
+      left.appendChild(input);
+
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '✕ Remove';
+      del.addEventListener('click', () => { objects.splice(i, 1); render(); });
+
+      li.appendChild(left);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+
+  function norm(e) {
+    const r = img.getBoundingClientRect();
+    return {
+      x: Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1),
+      y: Math.min(Math.max((e.clientY - r.top) / r.height, 0), 1),
+    };
+  }
+
+  img.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const p = norm(e);
+    const el = document.createElement('div');
+    el.className = 'draw-box';
+    stage.appendChild(el);
+    drawing = { sx: p.x, sy: p.y, el, box: null };
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!drawing) return;
+    const p = norm(e);
+    const x = Math.min(drawing.sx, p.x);
+    const y = Math.min(drawing.sy, p.y);
+    const w = Math.abs(p.x - drawing.sx);
+    const h = Math.abs(p.y - drawing.sy);
+    Object.assign(drawing.el.style, {
+      left: x * 100 + '%', top: y * 100 + '%',
+      width: w * 100 + '%', height: h * 100 + '%',
+    });
+    drawing.box = { x, y, w, h };
+  });
+
+  function finishDraw() {
+    if (!drawing) return;
+    const box = drawing.box;
+    drawing.el.remove();
+    drawing = null;
+    if (box && box.w > 0.01 && box.h > 0.01) {
+      objects.push({ label: '', ...box });
+      render();
+    }
+  }
+  window.addEventListener('pointerup', finishDraw);
+  window.addEventListener('pointercancel', finishDraw);
+
+  return {
+    getObjects: () => objects,
+    setObjects: (arr) => {
+      objects = (arr || []).map((o) => ({
+        label: o.label || '', x: o.x, y: o.y, w: o.w, h: o.h,
+      }));
+      render();
+    },
+    clear: () => { objects = []; render(); },
+    render,
+  };
+};

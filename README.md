@@ -1,39 +1,52 @@
 # 🔍 Hidden Object Hunt
 
-A small full-stack website for hosting a "find the hidden objects" game.
+A small full-stack website for hosting a "find the hidden objects" game with
+**multiple levels**.
 
-- **Admins** upload a picture in **full quality** and mark rectangular regions where objects are hidden.
-- **Players** enter a nickname, then hunt for the objects against a live timer.
-- A shared **scoreboard** ranks everyone who finds them all, fastest first.
+- **Admins** (and players) upload a picture in **full quality**, name it, and mark
+  rectangular regions where objects are hidden — each image is its own **level**.
+- **Players** enter a nickname, **browse the levels**, and hunt for the objects
+  against a live timer.
+- Each level has its own **scoreboard** ranking everyone who finds them all.
 
-Everything (the image, the object markers, and the scoreboard) is stored on the
-server, so it's shared across all visitors and devices.
+Everything (images, object markers, and scoreboards) is stored on the server, so
+it's shared across all visitors and devices.
 
 ## Features
 
 ### Player UI
+- **Browse levels** — a grid of levels to pick from. The number of objects is
+  **not** revealed up front.
 - **Score `0/?`** — the left number counts objects found and updates live; the
-  right side stays a `?` until *every* object is found, at which point it reveals
-  the total (matching the number of objects the admin marked).
+  right side stays a `?` until *every* object is found (the total is never shown
+  early, to keep the challenge).
 - **Timer** in `HH:MM:SS` (`00:00:00`) that starts when the image loads.
-- **Scoreboard** showing `nickname — time`, fastest first, with your own run
-  highlighted.
-- Clicking a hidden object drops a green marker (with the admin's optional label);
-  clicking empty space shows a small "miss" ripple.
+- **Misclicks** are counted and shown live.
+- **Per-level scoreboard** showing `nickname · time · misses`, fastest first
+  (ties broken by fewest misses), keeping only each player's **best** run, with
+  your own run highlighted.
+- Clicking a hidden object drops a green marker; clicking empty space shows a
+  small "miss" ripple. The name of a found object is **not** revealed to players.
+
+### Create a level (`/submit.html`)
+Any player can create a level: upload an image, name it, and drag rectangles over
+the hidden objects. Submissions are held for **admin approval** before they appear
+in the browse list. Marking works with mouse and touch.
 
 ### Admin UI (`/admin.html`)
 - Password-protected.
-- Upload an image — JPEG/PNG are stored **as-is, no compression** (up to 50 MB).
-  Apple **HEIC/HEIF** photos (the default iPhone format) are automatically
-  converted to high-quality JPEG on upload, since most browsers can't display HEIC.
-- **Drag rectangles** directly on the image to mark each hidden object.
-- Give each object an optional name, remove individual marks, or clear all.
-- Save the hunt (replaces the active game) and reset the scoreboard.
+- **Approve / reject** pending player submissions.
+- **Create levels** directly (auto-approved): upload, name, and mark objects.
+- **Delete** any level, or **reset** an individual level's scoreboard.
+- Images are stored full quality; Apple **HEIC/HEIF** photos (the default iPhone
+  format) are automatically converted to high-quality JPEG on upload, since most
+  browsers can't display HEIC.
 
 ### Anti-cheat
-Object coordinates are **never** sent to the player's browser. Each click is
-verified server-side (`POST /api/check`), and only a found object's location is
-returned — so players can't read the answers from the network or devtools.
+Object coordinates and the object count are **never** sent to the player's
+browser up front. Each click is verified server-side (`POST /api/check`), and
+only a found object's location is returned — so players can't read the answers
+(or how many remain) from the network or devtools.
 
 ## Getting started
 
@@ -126,30 +139,39 @@ Open the WebUI at `http://<unraid-ip>:3000/`, and the admin panel at
 ## Project layout
 
 ```
-server.js            Express server + JSON API (upload, check, score)
+server.js            Express server + JSON API (levels, upload, check, score)
 public/
   index.html         Landing page — nickname entry
-  play.html          The game (HUD: score, timer; scoreboard overlay)
-  admin.html         Admin panel — upload + mark objects
+  browse.html        Level picker (grid of approved levels)
+  play.html          The game (HUD: score, timer, misses; scoreboard overlay)
+  submit.html        Player level creation (upload, name, mark) — pending approval
+  admin.html         Admin panel — approve/reject, create, delete levels
   css/style.css      Shared styles
+  js/marker.js       Reusable drag-to-mark tool (mouse + touch)
   js/play.js         Gameplay logic
-  js/admin.js        Admin logic (upload, drag-to-mark, save)
+  js/submit.js       Player submission logic
+  js/admin.js        Admin logic (approve/reject/create/delete)
 uploads/             Uploaded images (gitignored)
-data/                game.json + scoreboard.json (gitignored)
+data/                levels.json + scoreboard.json (gitignored)
 ```
 
 ## API reference
 
-| Method | Endpoint                        | Auth  | Description                                  |
-| ------ | ------------------------------- | ----- | -------------------------------------------- |
-| GET    | `/api/game`                     | —     | Public game info (image + object count only) |
-| POST   | `/api/check`                    | —     | Check a normalized `{x,y}` click for a hit   |
-| POST   | `/api/score`                    | —     | Submit a completed run to the scoreboard     |
-| GET    | `/api/scoreboard`               | —     | Top scores, fastest first                    |
-| POST   | `/api/admin/login`              | admin | Verify the admin password                    |
-| GET    | `/api/admin/game`               | admin | Full game config incl. coordinates           |
-| POST   | `/api/admin/upload`             | admin | Upload a full-quality image                  |
-| POST   | `/api/admin/game`               | admin | Save image + marked objects                  |
-| POST   | `/api/admin/reset-scoreboard`   | admin | Clear the scoreboard                         |
+| Method | Endpoint                            | Auth  | Description                                       |
+| ------ | ----------------------------------- | ----- | ------------------------------------------------ |
+| GET    | `/api/levels`                       | —     | Approved levels for browsing (no object count)   |
+| GET    | `/api/levels/:id`                   | —     | One level to play (image + count for game logic) |
+| POST   | `/api/check`                        | —     | Check a normalized `{levelId,x,y}` click         |
+| POST   | `/api/score`                        | —     | Submit a completed run (incl. misses)            |
+| GET    | `/api/scoreboard/:levelId`          | —     | Best run per player for a level                  |
+| POST   | `/api/upload`                       | —     | Upload an image (handles HEIC)                    |
+| POST   | `/api/levels/submit`                | —     | Submit a player-made level (pending approval)    |
+| POST   | `/api/admin/login`                  | admin | Verify the admin password                        |
+| GET    | `/api/admin/levels`                 | admin | All levels incl. pending + coordinates           |
+| POST   | `/api/admin/levels`                 | admin | Create a level (auto-approved)                   |
+| POST   | `/api/admin/levels/:id/approve`     | admin | Approve a pending submission                     |
+| POST   | `/api/admin/levels/:id/reject`      | admin | Reject (delete) a pending submission             |
+| DELETE | `/api/admin/levels/:id`             | admin | Delete a level (and its scores/image)            |
+| POST   | `/api/admin/reset-scoreboard?level=`| admin | Clear one level's scores (or all)                |
 
 Admin requests authenticate with an `x-admin-password` header.

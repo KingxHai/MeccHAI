@@ -18,12 +18,16 @@
       <div class="stat-value" id="timer">00:00:00</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Player</div>
-      <div class="stat-value" id="playerName" style="font-size:1.1rem;">—</div>
+      <div class="stat-label">Misses</div>
+      <div class="stat-value" id="missCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Level</div>
+      <div class="stat-value" id="levelName" style="font-size:1.1rem;">—</div>
     </div>
     <div class="grow"></div>
     <button class="btn-secondary" id="boardBtn">🏆 Scoreboard</button>
-    <a class="btn btn-secondary" href="/index.html">Quit</a>
+    <a class="btn btn-secondary" href="/browse.html">Levels</a>
   </div>
 
   <div class="stage-wrap">
@@ -41,11 +45,18 @@
         <span class="hint">Your time</span>
         <span class="stat-value" id="winTime">00:00:00</span>
       </div>
+      <div class="row space">
+        <span class="hint">Misclicks</span>
+        <span class="stat-value" id="winMiss" style="font-size:1.1rem;">0</span>
+      </div>
       <div id="winMsg" class="msg ok"></div>
       <div class="divider"></div>
       <h2>🏆 Scoreboard</h2>
       <div id="winBoard"></div>
-      <a class="btn btn-block" href="/index.html">Play again</a>
+      <div class="row" style="margin-top:16px;">
+        <a class="btn grow" href="/play.html" id="replayBtn">Play again</a>
+        <a class="btn btn-secondary grow" href="/browse.html">Other levels</a>
+      </div>
     </div>
   </div>
 

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pick a level | Hidden Object Hunt</title>
+  <link rel="icon" href="/icon.png" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <h1>🔍 Pick a level</h1>
+      <div class="row">
+        <span class="badge">Player: <strong id="playerName">—</strong></span>
+        <a class="btn btn-secondary" href="/submit.html">➕ Create level</a>
+        <a class="btn btn-secondary" href="/index.html">Change name</a>
+      </div>
+    </div>
+
+    <p class="subtitle" id="emptyState" style="display:none;">
+      No levels yet. Be the first — <a href="/submit.html">create one</a>! (An admin approves new levels before they appear here.)
+    </p>
+
+    <div class="level-grid" id="grid"></div>
+  </div>
+
+  <script>
+    const nickname = localStorage.getItem('nickname');
+    if (!nickname) window.location.href = '/index.html';
+    document.getElementById('playerName').textContent = nickname;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    async function load() {
+      const grid = document.getElementById('grid');
+      try {
+        const res = await fetch('/api/levels');
+        const levels = await res.json();
+        if (!levels.length) {
+          document.getElementById('emptyState').style.display = 'block';
+          return;
+        }
+        grid.innerHTML = levels.map((l) => `
+          <a class="level-card" href="/play.html?level=${encodeURIComponent(l.id)}">
+            <div class="level-thumb"><img src="${escapeHtml(l.imageUrl)}" loading="lazy" alt="" /></div>
+            <div class="level-name">${escapeHtml(l.name)}</div>
+          </a>
+        `).join('');
+      } catch {
+        grid.innerHTML = '<p class="hint">Could not load levels.</p>';
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
