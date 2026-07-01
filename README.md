@@ -1,4 +1,4 @@
-# 🔍 Hidden Object Hunt
+# 🔍 Search the Mecchai
 
 A small full-stack website for hosting a "find the hidden objects" game with
 **multiple levels**.

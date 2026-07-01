@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>Hidden-Object-Hunt</Name>
+  <Name>Search-the-Mecchai</Name>
   <Repository>ghcr.io/kingxhai/mecchai:latest</Repository>
   <Registry>https://github.com/kingxhai/mecchai/pkgs/container/mecchai</Registry>
   <Network>bridge</Network>

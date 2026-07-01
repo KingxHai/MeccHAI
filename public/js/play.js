@@ -162,7 +162,7 @@ async function loadLevel() {
   }
   state.total = level.objectCount;
   els.levelName.textContent = level.name;
-  document.title = level.name + ' | Hidden Object Hunt';
+  document.title = level.name + ' | Search the Mecchai';
   updateScore();
 
   zoom = createZoom({ viewport: els.viewport, stage: els.stage, img: els.img, onTap: handleTap });

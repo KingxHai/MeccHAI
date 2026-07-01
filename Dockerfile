@@ -1,4 +1,4 @@
-# ---- Hidden Object Hunt ----
+# ---- Search the Mecchai ----
 # Single-image, self-contained build. All persistent state lives in
 # /app/data (game + scoreboard) and /app/uploads (images) — map those to
 # host volumes so nothing is lost when the container restarts.
