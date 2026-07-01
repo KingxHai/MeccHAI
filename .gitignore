@@ -1,0 +1,10 @@
+node_modules/
+
+# Runtime data (uploaded images, saved game, scoreboard) — keep the dirs, ignore contents
+uploads/*
+!uploads/.gitkeep
+data/*
+!data/.gitkeep
+
+*.log
+.DS_Store

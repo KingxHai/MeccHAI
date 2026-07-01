@@ -1,0 +1,18 @@
+{
+  "name": "mecchai-hidden-object-game",
+  "version": "1.0.0",
+  "description": "A hidden-object game website. Admins upload a full-quality image and mark hidden objects; users hunt for them against a timer with a shared scoreboard.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.0.0"
+  }
+}

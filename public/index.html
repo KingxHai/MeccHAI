@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hidden Object Hunt</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="center-screen">
+    <div class="card">
+      <h1>🔍 Hidden Object Hunt</h1>
+      <p class="subtitle">Enter a nickname and start finding the hidden objects as fast as you can!</p>
+
+      <div id="noGame" class="msg error hidden">No hunt has been set up yet. Check back soon!</div>
+
+      <form id="startForm">
+        <label for="nickname">Your nickname</label>
+        <input type="text" id="nickname" maxlength="30" placeholder="e.g. EagleEye" autocomplete="off" required />
+        <button type="submit" class="btn-block" id="startBtn">Start hunting →</button>
+        <div id="msg" class="msg"></div>
+      </form>
+
+      <div class="divider"></div>
+      <div class="row space">
+        <span class="hint">Objects to find: <strong id="objCount">…</strong></span>
+        <a class="hint" href="/admin.html">Admin</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('startForm');
+    const nickInput = document.getElementById('nickname');
+    const msg = document.getElementById('msg');
+    const startBtn = document.getElementById('startBtn');
+
+    // Pre-fill last used nickname.
+    nickInput.value = localStorage.getItem('nickname') || '';
+
+    async function loadGame() {
+      try {
+        const res = await fetch('/api/game');
+        const game = await res.json();
+        if (!game || !game.imageUrl || !game.objectCount) {
+          document.getElementById('noGame').classList.remove('hidden');
+          startBtn.disabled = true;
+          document.getElementById('objCount').textContent = '0';
+        } else {
+          document.getElementById('objCount').textContent = game.objectCount;
+        }
+      } catch {
+        document.getElementById('objCount').textContent = '?';
+      }
+    }
+    loadGame();
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nick = nickInput.value.trim();
+      if (!nick) {
+        msg.textContent = 'Please enter a nickname.';
+        msg.className = 'msg error';
+        return;
+      }
+      localStorage.setItem('nickname', nick);
+      window.location.href = '/play.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hunting… | Hidden Object Hunt</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="hud">
+    <div class="stat">
+      <div class="stat-label">Found</div>
+      <div class="stat-value"><span id="foundCount">0</span>/<span id="totalCount">?</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Time</div>
+      <div class="stat-value" id="timer">00:00:00</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Player</div>
+      <div class="stat-value" id="playerName" style="font-size:1.1rem;">—</div>
+    </div>
+    <div class="grow"></div>
+    <button class="btn-secondary" id="boardBtn">🏆 Scoreboard</button>
+    <a class="btn btn-secondary" href="/index.html">Quit</a>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="stage" id="stage">
+      <img id="gameImage" alt="Find the hidden objects" />
+    </div>
+  </div>
+
+  <!-- Win overlay -->
+  <div class="overlay hidden" id="winOverlay">
+    <div class="card">
+      <h1>🎉 You found them all!</h1>
+      <p class="subtitle">Nice work, <strong id="winName"></strong>!</p>
+      <div class="row space">
+        <span class="hint">Your time</span>
+        <span class="stat-value" id="winTime">00:00:00</span>
+      </div>
+      <div id="winMsg" class="msg ok"></div>
+      <div class="divider"></div>
+      <h2>🏆 Scoreboard</h2>
+      <div id="winBoard"></div>
+      <a class="btn btn-block" href="/index.html">Play again</a>
+    </div>
+  </div>
+
+  <!-- Scoreboard overlay -->
+  <div class="overlay hidden" id="boardOverlay">
+    <div class="card">
+      <div class="topbar">
+        <h1>🏆 Scoreboard</h1>
+        <button class="btn-secondary" id="closeBoard">Close</button>
+      </div>
+      <div id="boardContent"></div>
+    </div>
+  </div>
+
+  <script src="/js/play.js"></script>
+</body>
+</html>
