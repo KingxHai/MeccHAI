@@ -37,6 +37,7 @@
       <button class="btn-secondary" id="zoomInBtn" title="Zoom in">＋</button>
     </div>
     <button class="btn-secondary" id="boardBtn">🏆</button>
+    <button class="btn-danger" id="giveUpBtn">🏳️ Give up</button>
     <a class="btn btn-secondary" href="/browse.html">Levels</a>
   </div>
 
@@ -71,6 +72,38 @@
       <div id="winBoard"></div>
       <div class="row" style="margin-top:16px;">
         <a class="btn grow" href="/play.html" id="replayBtn">Play again</a>
+        <a class="btn btn-secondary grow" href="/browse.html">Other levels</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Give-up overlay -->
+  <div class="overlay hidden" id="giveupOverlay">
+    <div class="card">
+      <h1>🏳️ You gave up</h1>
+      <p class="subtitle">Nice try, <strong id="giveupName"></strong>! The missed objects are marked in red.</p>
+      <div class="row space">
+        <span class="hint">Score</span>
+        <span class="stat-value" id="giveupScore">0/0</span>
+      </div>
+      <div class="row space">
+        <span class="hint">Your time</span>
+        <span class="stat-value" id="giveupTime" style="font-size:1.1rem;">00:00:00</span>
+      </div>
+      <div class="row space">
+        <span class="hint">Misclicks</span>
+        <span class="stat-value" id="giveupMiss" style="font-size:1.1rem;">0</span>
+      </div>
+      <div class="row space">
+        <span class="hint">Hints used</span>
+        <span class="stat-value" id="giveupHints" style="font-size:1.1rem;">0</span>
+      </div>
+      <div class="msg hint" style="margin-top:8px;">This run wasn't added to the scoreboard — only completed hunts are ranked.</div>
+      <div class="divider"></div>
+      <h2>🏆 Scoreboard</h2>
+      <div id="giveupBoard"></div>
+      <div class="row" style="margin-top:16px;">
+        <a class="btn grow" href="/play.html" id="giveupReplayBtn">Try again</a>
         <a class="btn btn-secondary grow" href="/browse.html">Other levels</a>
       </div>
     </div>

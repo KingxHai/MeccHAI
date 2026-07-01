@@ -278,6 +278,20 @@ app.post('/api/hint', (req, res) => {
   res.json({ hasHint: true, hint: pick.hint, remaining: candidates.length });
 });
 
+// Reveal every not-yet-found object when a player gives up. Body:
+// { levelId, foundIds }. Only meant to be called once the player has
+// deliberately ended their own run, so it's fine to expose the remaining
+// coordinates at that point.
+app.post('/api/give-up', (req, res) => {
+  const level = getLevels().find((l) => l.id === req.body.levelId && l.status === 'approved');
+  if (!level) return res.status(404).json({ error: 'Level not found.' });
+  const found = new Set(Array.isArray(req.body.foundIds) ? req.body.foundIds : []);
+  const missed = level.objects
+    .filter((o) => !found.has(o.id))
+    .map((o) => ({ id: o.id, label: o.label || '', box: { x: o.x, y: o.y, w: o.w, h: o.h } }));
+  res.json({ missed, total: level.objects.length });
+});
+
 // Public image upload (used by both submission and admin flows). Handles HEIC.
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No image uploaded.' });

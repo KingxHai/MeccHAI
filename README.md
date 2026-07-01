@@ -34,6 +34,10 @@ it's shared across all visitors and devices.
 - Clicking a hidden object drops a green marker with its name, faded so it
   doesn't clutter the hunt — hover (or tap, on touch) a name to bring it to full
   opacity. Clicking empty space shows a small "miss" ripple.
+- **Give up** — ends the run early (with a confirmation prompt), reveals every
+  object you hadn't found yet in a **red** box, and shows your final score
+  (found/total). Since it isn't a full completion, the run isn't added to the
+  scoreboard.
 
 ### Create a level (`/submit.html`)
 Any player can create a level: upload an image, name it, and drag rectangles over
@@ -180,6 +184,7 @@ data/                levels.json + scoreboard.json (gitignored)
 | POST   | `/api/score`                        | —     | Submit a completed run (incl. misses)            |
 | GET    | `/api/scoreboard/:levelId`          | —     | Best run per player for a level                  |
 | POST   | `/api/hint`                         | —     | Get a hint for an unfound object (if one exists) |
+| POST   | `/api/give-up`                      | —     | Reveal all not-yet-found objects (ends the run)  |
 | POST   | `/api/upload`                       | —     | Upload an image (handles HEIC)                    |
 | POST   | `/api/levels/submit`                | —     | Submit a player-made level (pending approval)    |
 | POST   | `/api/admin/login`                  | admin | Verify the admin password                        |

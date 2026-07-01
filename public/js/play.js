@@ -34,9 +34,19 @@ const els = {
   winMsg: document.getElementById('winMsg'),
   winBoard: document.getElementById('winBoard'),
   replayBtn: document.getElementById('replayBtn'),
+  giveUpBtn: document.getElementById('giveUpBtn'),
+  giveupOverlay: document.getElementById('giveupOverlay'),
+  giveupName: document.getElementById('giveupName'),
+  giveupScore: document.getElementById('giveupScore'),
+  giveupTime: document.getElementById('giveupTime'),
+  giveupMiss: document.getElementById('giveupMiss'),
+  giveupHints: document.getElementById('giveupHints'),
+  giveupBoard: document.getElementById('giveupBoard'),
+  giveupReplayBtn: document.getElementById('giveupReplayBtn'),
 };
 
 els.replayBtn.href = '/play.html?level=' + encodeURIComponent(levelId);
+els.giveupReplayBtn.href = '/play.html?level=' + encodeURIComponent(levelId);
 
 const state = { total: 0, found: new Set(), misses: 0, hints: 0, startTime: null, timerId: null, finished: false };
 
@@ -68,9 +78,9 @@ function updateScore() {
   els.hintCount.textContent = state.hints;
 }
 
-function addMarker(box, label) {
+function addMarker(box, label, missed) {
   const m = document.createElement('div');
-  m.className = 'marker';
+  m.className = missed ? 'marker missed' : 'marker';
   m.style.left = box.x * 100 + '%';
   m.style.top = box.y * 100 + '%';
   m.style.width = box.w * 100 + '%';
@@ -158,6 +168,7 @@ async function loadLevel() {
 
 // ----- hint -----
 async function showHint() {
+  if (state.finished || !state.startTime) return;
   els.hintBtn.disabled = true;
   try {
     const res = await fetch('/api/hint', {
@@ -185,9 +196,15 @@ async function showHint() {
 }
 
 // ----- end of game -----
+function lockControls() {
+  els.hintBtn.disabled = true;
+  els.giveUpBtn.disabled = true;
+}
+
 async function finish() {
   state.finished = true;
   stopTimer();
+  lockControls();
   const elapsed = Date.now() - state.startTime;
   els.winName.textContent = nickname;
   els.winTime.textContent = fmtTime(elapsed);
@@ -206,6 +223,37 @@ async function finish() {
   }
   await renderBoard(els.winBoard, { timeMs: elapsed, misses: state.misses, hints: state.hints });
   els.winOverlay.classList.remove('hidden');
+}
+
+async function giveUp() {
+  if (state.finished || !state.startTime) return;
+  if (!confirm(`Give up? You've found ${state.found.size} so far, and the rest will be revealed.`)) return;
+
+  state.finished = true;
+  stopTimer();
+  lockControls();
+  els.hintBanner.classList.add('hidden');
+  const elapsed = Date.now() - state.startTime;
+
+  try {
+    const res = await fetch('/api/give-up', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ levelId, foundIds: [...state.found] }),
+    });
+    const data = await res.json();
+    if (Number.isFinite(data.total)) state.total = data.total;
+    (data.missed || []).forEach((o) => addMarker(o.box, o.label, true));
+  } catch { /* still show the results screen even if the reveal fetch failed */ }
+
+  els.totalCount.textContent = String(state.total);
+  els.giveupName.textContent = nickname;
+  els.giveupScore.textContent = `${state.found.size}/${state.total}`;
+  els.giveupTime.textContent = fmtTime(elapsed);
+  els.giveupMiss.textContent = state.misses;
+  els.giveupHints.textContent = state.hints;
+  await renderBoard(els.giveupBoard, null);
+  els.giveupOverlay.classList.remove('hidden');
 }
 
 async function renderBoard(target, myRun) {
@@ -236,6 +284,7 @@ async function renderBoard(target, myRun) {
 
 // ----- wiring -----
 els.hintBtn.addEventListener('click', showHint);
+els.giveUpBtn.addEventListener('click', giveUp);
 els.zoomInBtn.addEventListener('click', () => zoom && zoom.zoomIn());
 els.zoomOutBtn.addEventListener('click', () => zoom && zoom.zoomOut());
 els.zoomResetBtn.addEventListener('click', () => zoom && zoom.reset());

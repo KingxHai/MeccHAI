@@ -236,6 +236,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .marker .marker-tag.solid {
   opacity: 1;
 }
+
+/* revealed-but-missed object, shown after giving up */
+.marker.missed {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(255, 93, 108, 0.25), 0 0 18px rgba(255, 93, 108, 0.55);
+}
+.marker.missed .marker-tag {
+  background: var(--danger);
+  color: #2a0a0d;
+}
 @keyframes pop { from { transform: scale(1.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* miss ripple */
