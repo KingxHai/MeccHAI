@@ -5,6 +5,12 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const heicConvert = require('heic-convert');
+
+// Apple HEIC/HEIF files (the default iPhone photo format) can't be displayed
+// by most browsers, so we transcode them to JPEG on upload. Quality is kept
+// very high to preserve the fine detail needed to hide objects.
+const HEIC_JPEG_QUALITY = 0.92;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -80,7 +86,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB to allow full-quality photos
   fileFilter: (req, file, cb) => {
-    if (/^image\//.test(file.mimetype)) cb(null, true);
+    // Some systems report HEIC/HEIF as application/octet-stream, so also
+    // accept by file extension.
+    const ext = path.extname(file.originalname).toLowerCase();
+    const isHeic = ext === '.heic' || ext === '.heif';
+    if (/^image\//.test(file.mimetype) || isHeic) cb(null, true);
     else cb(new Error('Only image files are allowed.'));
   },
 });
@@ -168,10 +178,32 @@ app.get('/api/admin/game', requireAdmin, (req, res) => {
   res.json(getGame());
 });
 
-// Upload a full-quality image.
-app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) => {
+// Upload a full-quality image. HEIC/HEIF (iPhone photos) are transcoded to
+// JPEG so every browser can display them; other formats are stored as-is.
+app.post('/api/admin/upload', requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No image uploaded.' });
-  res.json({ imageUrl: '/uploads/' + req.file.filename });
+
+  const ext = path.extname(req.file.filename).toLowerCase();
+  if (ext !== '.heic' && ext !== '.heif') {
+    return res.json({ imageUrl: '/uploads/' + req.file.filename });
+  }
+
+  // Transcode HEIC -> JPEG.
+  try {
+    const inputBuffer = fs.readFileSync(req.file.path);
+    const outputBuffer = await heicConvert({
+      buffer: inputBuffer,
+      format: 'JPEG',
+      quality: HEIC_JPEG_QUALITY,
+    });
+    const jpgName = path.basename(req.file.filename, ext) + '.jpg';
+    fs.writeFileSync(path.join(UPLOAD_DIR, jpgName), Buffer.from(outputBuffer));
+    fs.unlinkSync(req.file.path); // drop the original HEIC
+    res.json({ imageUrl: '/uploads/' + jpgName });
+  } catch (err) {
+    fs.unlink(req.file.path, () => {}); // best-effort cleanup
+    res.status(400).json({ error: 'Could not process HEIC image: ' + err.message });
+  }
 });
 
 // Save the game (image + marked objects). This replaces the active game.

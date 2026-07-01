@@ -99,7 +99,8 @@ els.uploadBtn.addEventListener('click', async () => {
     els.uploadMsg.className = 'msg error';
     return;
   }
-  els.uploadMsg.textContent = 'Uploading…';
+  const isHeic = /\.(heic|heif)$/i.test(file.name);
+  els.uploadMsg.textContent = isHeic ? 'Uploading & converting HEIC… (may take a few seconds)' : 'Uploading…';
   els.uploadMsg.className = 'msg';
   const fd = new FormData();
   fd.append('image', file);

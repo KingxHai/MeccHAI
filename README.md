@@ -23,7 +23,9 @@ server, so it's shared across all visitors and devices.
 
 ### Admin UI (`/admin.html`)
 - Password-protected.
-- Upload an image — the original file is stored **as-is, no compression** (up to 50 MB).
+- Upload an image — JPEG/PNG are stored **as-is, no compression** (up to 50 MB).
+  Apple **HEIC/HEIF** photos (the default iPhone format) are automatically
+  converted to high-quality JPEG on upload, since most browsers can't display HEIC.
 - **Drag rectangles** directly on the image to mark each hidden object.
 - Give each object an optional name, remove individual marks, or clear all.
 - Save the hunt (replaces the active game) and reset the scoreboard.

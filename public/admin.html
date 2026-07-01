@@ -36,9 +36,10 @@
 
     <div class="card wide">
       <h2>1. Upload an image (full quality)</h2>
-      <p class="hint">The original file is stored as-is — no compression. Up to 50&nbsp;MB.</p>
+      <p class="hint">JPEG/PNG are stored as-is — no compression. Up to 50&nbsp;MB. Apple
+        <strong>HEIC/HEIF</strong> photos are auto-converted to high-quality JPEG so every browser can show them.</p>
       <div class="row">
-        <input type="file" id="fileInput" accept="image/*" class="grow" />
+        <input type="file" id="fileInput" accept="image/*,.heic,.heif" class="grow" />
         <button id="uploadBtn">Upload</button>
       </div>
       <div id="uploadMsg" class="msg"></div>
