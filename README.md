@@ -28,16 +28,21 @@ it's shared across all visitors and devices.
 - **Hint button** — asks the server for a clue for the next not-yet-found
   object, in marking order (object 1, then 2, ...), skipping ones already
   found (only objects the creator gave a hint have one).
-- **Per-level scoreboard** showing `nickname · time · misses · hints used`,
-  fastest first (ties broken by fewest misses, then fewest hints), keeping only
-  each player's **best** run, with your own run highlighted.
+- **Per-level scoreboard** showing `nickname · found/total · time · misses ·
+  hints used`. Completed runs rank first (fastest, ties broken by fewest
+  misses then hints); gave-up runs rank below them (most found first) with a
+  red **FAILED** tag in place of a time. Keeps only each player's best run —
+  a completion always outranks a give-up — with your own run highlighted.
 - Clicking a hidden object drops a green marker with its name, faded so it
   doesn't clutter the hunt — hover (or tap, on touch) a name to bring it to full
   opacity. Clicking empty space shows a small "miss" ripple.
-- **Give up** — ends the run early (with a confirmation prompt), reveals every
-  object you hadn't found yet in a **red** box, and shows your final score
-  (found/total). Since it isn't a full completion, the run isn't added to the
-  scoreboard.
+- **Give up** — ends the run early (with an in-app confirmation prompt),
+  reveals every object you hadn't found yet in a **red** box, and shows your
+  final score (found/total). The results card can be **minimized** to a small
+  "Show results" button so you can freely inspect the revealed board (zoom
+  included) before reopening it. Gave-up runs are still added to the
+  scoreboard as a **failed attempt** — ranked below completed runs, showing
+  `found/total` and a red **FAILED** tag instead of a time.
 
 ### Create a level (`/submit.html`)
 Any player can create a level: upload an image, name it, and drag rectangles over

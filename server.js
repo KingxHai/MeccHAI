@@ -103,25 +103,55 @@ function publicLevelSummary(level) {
   return { id: level.id, name: level.name, imageUrl: level.imageUrl };
 }
 
-// Best run per nickname for a level (fixes duplicate/replayed rows), sorted
-// by time, then misses, then hints used.
+// Best run per nickname for a level (fixes duplicate/replayed rows). A
+// completed run (found === total) always beats a gave-up one; among
+// completed runs the fastest (then fewest misses, then hints) wins; among
+// gave-up runs the one with the most found (then fewest misses, then hints)
+// wins. The final list ranks all completed runs first, then gave-up runs.
 function levelScoreboard(levelId) {
+  const isDone = (s) => s.found === s.total;
   const best = new Map();
   for (const s of getScores()) {
     if (s.levelId !== levelId) continue;
     const cur = best.get(s.nickname);
-    const better =
-      !cur ||
-      s.timeMs < cur.timeMs ||
-      (s.timeMs === cur.timeMs &&
-        ((s.misses || 0) < (cur.misses || 0) ||
-          ((s.misses || 0) === (cur.misses || 0) && (s.hints || 0) < (cur.hints || 0))));
+    let better;
+    if (!cur) {
+      better = true;
+    } else if (isDone(s) !== isDone(cur)) {
+      better = isDone(s); // a completion always outranks a gave-up run
+    } else if (isDone(s)) {
+      better =
+        s.timeMs < cur.timeMs ||
+        (s.timeMs === cur.timeMs &&
+          ((s.misses || 0) < (cur.misses || 0) ||
+            ((s.misses || 0) === (cur.misses || 0) && (s.hints || 0) < (cur.hints || 0))));
+    } else {
+      better =
+        s.found > cur.found ||
+        (s.found === cur.found &&
+          ((s.misses || 0) < (cur.misses || 0) ||
+            ((s.misses || 0) === (cur.misses || 0) && (s.hints || 0) < (cur.hints || 0))));
+    }
     if (better) best.set(s.nickname, s);
   }
-  return [...best.values()]
-    .sort((a, b) => a.timeMs - b.timeMs || (a.misses || 0) - (b.misses || 0) || (a.hints || 0) - (b.hints || 0))
-    .slice(0, 50)
-    .map((s) => ({ nickname: s.nickname, timeMs: s.timeMs, misses: s.misses || 0, hints: s.hints || 0 }));
+
+  const all = [...best.values()];
+  const completed = all
+    .filter(isDone)
+    .sort((a, b) => a.timeMs - b.timeMs || (a.misses || 0) - (b.misses || 0) || (a.hints || 0) - (b.hints || 0));
+  const gaveUp = all
+    .filter((s) => !isDone(s))
+    .sort((a, b) => b.found - a.found || (a.misses || 0) - (b.misses || 0) || (a.hints || 0) - (b.hints || 0));
+
+  return [...completed, ...gaveUp].slice(0, 50).map((s) => ({
+    nickname: s.nickname,
+    timeMs: s.timeMs,
+    misses: s.misses || 0,
+    hints: s.hints || 0,
+    found: s.found,
+    total: s.total,
+    completed: isDone(s),
+  }));
 }
 
 function removeUpload(imageUrl) {
@@ -230,7 +260,9 @@ app.post('/api/check', (req, res) => {
   res.json({ hit: false });
 });
 
-// Submit a finished run. Body: { levelId, nickname, timeMs, found, misses, hints }.
+// Submit a run — either completed (found === total) or given up on
+// (found < total, recorded as a failed attempt). Body:
+// { levelId, nickname, timeMs, found, misses, hints }.
 app.post('/api/score', (req, res) => {
   const level = getLevels().find((l) => l.id === req.body.levelId && l.status === 'approved');
   if (!level) return res.status(404).json({ error: 'Level not found.' });
@@ -244,7 +276,10 @@ app.post('/api/score', (req, res) => {
 
   if (!nickname) return res.status(400).json({ error: 'Nickname is required.' });
   if (!Number.isFinite(timeMs) || timeMs < 0) return res.status(400).json({ error: 'Invalid time.' });
-  if (found !== total || total === 0) return res.status(400).json({ error: 'Run not complete.' });
+  if (total === 0) return res.status(400).json({ error: 'Level has no objects.' });
+  if (!Number.isFinite(found) || found < 0 || found > total) {
+    return res.status(400).json({ error: 'Invalid found count.' });
+  }
 
   const scores = getScores();
   scores.push({

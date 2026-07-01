@@ -246,6 +246,13 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   background: var(--danger);
   color: #2a0a0d;
 }
+
+/* "FAILED" tag in the Time column for gave-up scoreboard entries */
+.fail-tag {
+  color: var(--danger);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
 @keyframes pop { from { transform: scale(1.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* miss ripple */

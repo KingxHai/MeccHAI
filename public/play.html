@@ -92,7 +92,10 @@
   <!-- Give-up overlay -->
   <div class="overlay hidden" id="giveupOverlay">
     <div class="card">
-      <h1>🏳️ You gave up</h1>
+      <div class="topbar">
+        <h1 style="margin:0;">🏳️ You gave up</h1>
+        <button class="btn-secondary" id="giveupMinimizeBtn" title="Hide this and look at the board">▁ Minimize</button>
+      </div>
       <p class="subtitle">Nice try, <strong id="giveupName"></strong>! The missed objects are marked in red.</p>
       <div class="row space">
         <span class="hint">Score</span>
@@ -110,7 +113,7 @@
         <span class="hint">Hints used</span>
         <span class="stat-value" id="giveupHints" style="font-size:1.1rem;">0</span>
       </div>
-      <div class="msg hint" style="margin-top:8px;">This run wasn't added to the scoreboard — only completed hunts are ranked.</div>
+      <div id="giveupMsg" class="msg ok"></div>
       <div class="divider"></div>
       <h2>🏆 Scoreboard</h2>
       <div id="giveupBoard"></div>
@@ -120,6 +123,8 @@
       </div>
     </div>
   </div>
+
+  <button class="btn btn-secondary hidden" id="giveupReopenBtn" style="position:fixed; bottom:18px; right:18px; z-index:20;">📋 Show results</button>
 
   <!-- Scoreboard overlay -->
   <div class="overlay hidden" id="boardOverlay">

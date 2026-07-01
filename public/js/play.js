@@ -45,8 +45,11 @@ const els = {
   giveupTime: document.getElementById('giveupTime'),
   giveupMiss: document.getElementById('giveupMiss'),
   giveupHints: document.getElementById('giveupHints'),
+  giveupMsg: document.getElementById('giveupMsg'),
   giveupBoard: document.getElementById('giveupBoard'),
   giveupReplayBtn: document.getElementById('giveupReplayBtn'),
+  giveupMinimizeBtn: document.getElementById('giveupMinimizeBtn'),
+  giveupReopenBtn: document.getElementById('giveupReopenBtn'),
 };
 
 els.replayBtn.href = '/play.html?level=' + encodeURIComponent(levelId);
@@ -205,6 +208,25 @@ function lockControls() {
   els.giveUpBtn.disabled = true;
 }
 
+// Submits the current run (win or give-up alike — the found/total values
+// determine which). Returns an error message string, or null on success.
+async function submitScore(elapsed) {
+  try {
+    const res = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        levelId, nickname, timeMs: elapsed,
+        found: state.found.size, misses: state.misses, hints: state.hints,
+      }),
+    });
+    const data = await res.json();
+    return data.ok ? null : (data.error || 'Could not save your score.');
+  } catch {
+    return 'Could not save your score (offline?).';
+  }
+}
+
 async function finish() {
   state.finished = true;
   stopTimer();
@@ -214,18 +236,9 @@ async function finish() {
   els.winTime.textContent = fmtTime(elapsed);
   els.winMiss.textContent = state.misses;
   els.winHints.textContent = state.hints;
-  try {
-    const res = await fetch('/api/score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ levelId, nickname, timeMs: elapsed, found: state.found.size, misses: state.misses, hints: state.hints }),
-    });
-    const data = await res.json();
-    els.winMsg.textContent = data.ok ? 'Your time was added to the scoreboard!' : (data.error || '');
-  } catch {
-    els.winMsg.textContent = 'Could not save your score (offline?).';
-  }
-  await renderBoard(els.winBoard, { timeMs: elapsed, misses: state.misses, hints: state.hints });
+  const err = await submitScore(elapsed);
+  els.winMsg.textContent = err || 'Your time was added to the scoreboard!';
+  await renderBoard(els.winBoard, { timeMs: elapsed, misses: state.misses, hints: state.hints, found: state.found.size });
   els.winOverlay.classList.remove('hidden');
 }
 
@@ -263,7 +276,12 @@ async function giveUp() {
   els.giveupTime.textContent = fmtTime(elapsed);
   els.giveupMiss.textContent = state.misses;
   els.giveupHints.textContent = state.hints;
-  await renderBoard(els.giveupBoard, null);
+
+  const err = await submitScore(elapsed);
+  els.giveupMsg.textContent = err || "Added to the scoreboard — it's marked as a failed attempt.";
+  els.giveupMsg.className = err ? 'msg error' : 'msg ok';
+
+  await renderBoard(els.giveupBoard, { timeMs: elapsed, misses: state.misses, hints: state.hints, found: state.found.size });
   els.giveupOverlay.classList.remove('hidden');
 }
 
@@ -275,18 +293,21 @@ async function renderBoard(target, myRun) {
     let myMarked = false;
     const rows = scores.map((s, i) => {
       const isMe = !myMarked && myRun && s.nickname === nickname &&
-        s.timeMs === myRun.timeMs && s.misses === myRun.misses && (s.hints || 0) === (myRun.hints || 0);
+        s.timeMs === myRun.timeMs && s.misses === myRun.misses &&
+        (s.hints || 0) === (myRun.hints || 0) && s.found === myRun.found;
       if (isMe) myMarked = true;
+      const timeCell = s.completed ? fmtTime(s.timeMs) : '<span class="fail-tag">FAILED</span>';
       return `<tr class="${isMe ? 'me' : ''}">
         <td class="rank">${i + 1}</td>
         <td>${escapeHtml(s.nickname)}</td>
-        <td>${fmtTime(s.timeMs)}</td>
+        <td>${s.found}/${s.total}</td>
+        <td>${timeCell}</td>
         <td>${s.misses}</td>
         <td>${s.hints || 0}</td>
       </tr>`;
     }).join('');
     target.innerHTML = `<table class="scoreboard">
-      <thead><tr><th class="rank">#</th><th>Nickname</th><th>Time</th><th>Misses</th><th>Hints</th></tr></thead>
+      <thead><tr><th class="rank">#</th><th>Nickname</th><th>Found</th><th>Time</th><th>Misses</th><th>Hints</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
   } catch {
     target.innerHTML = '<p class="hint">Could not load scoreboard.</p>';
@@ -302,6 +323,21 @@ els.giveupConfirmOverlay.addEventListener('click', (e) => { if (e.target === els
 els.zoomInBtn.addEventListener('click', () => zoom && zoom.zoomIn());
 els.zoomOutBtn.addEventListener('click', () => zoom && zoom.zoomOut());
 els.zoomResetBtn.addEventListener('click', () => zoom && zoom.reset());
+
+els.giveupMinimizeBtn.addEventListener('click', () => {
+  els.giveupOverlay.classList.add('hidden');
+  els.giveupReopenBtn.classList.remove('hidden');
+});
+els.giveupReopenBtn.addEventListener('click', () => {
+  els.giveupOverlay.classList.remove('hidden');
+  els.giveupReopenBtn.classList.add('hidden');
+});
+els.giveupOverlay.addEventListener('click', (e) => {
+  if (e.target === els.giveupOverlay) {
+    els.giveupOverlay.classList.add('hidden');
+    els.giveupReopenBtn.classList.remove('hidden');
+  }
+});
 
 els.boardBtn.addEventListener('click', async () => {
   await renderBoard(els.boardContent, null);
