@@ -49,9 +49,9 @@
       <div id="approvedList" class="admin-list"></div>
     </div>
 
-    <!-- Create a level -->
-    <div class="card wide" style="margin-top:18px;">
-      <h2>➕ Create a level (auto-approved)</h2>
+    <!-- Create / edit a level -->
+    <div class="card wide" style="margin-top:18px;" id="editorCard">
+      <h2 id="editorTitle">➕ Create a level (auto-approved)</h2>
       <label for="levelName">Level name</label>
       <input type="text" id="levelName" maxlength="60" placeholder="e.g. The Kitchen" autocomplete="off" />
       <p class="hint" style="margin-top:14px;">Full quality; HEIC/HEIF auto-converted to JPEG. Up to 50&nbsp;MB.</p>
@@ -75,6 +75,7 @@
       <div class="row" style="margin-top:14px;">
         <button class="btn-success" id="createBtn">💾 Create level</button>
         <button class="btn-secondary" id="clearBtn">Clear marks</button>
+        <button class="btn-secondary hidden" id="cancelEditBtn">✕ Cancel edit</button>
       </div>
       <div id="createMsg" class="msg"></div>
     </div>

@@ -14,6 +14,7 @@ const els = {
   totalCount: document.getElementById('totalCount'),
   timer: document.getElementById('timer'),
   missCount: document.getElementById('missCount'),
+  hintCount: document.getElementById('hintCount'),
   levelName: document.getElementById('levelName'),
   hintBtn: document.getElementById('hintBtn'),
   hintBanner: document.getElementById('hintBanner'),
@@ -29,6 +30,7 @@ const els = {
   winName: document.getElementById('winName'),
   winTime: document.getElementById('winTime'),
   winMiss: document.getElementById('winMiss'),
+  winHints: document.getElementById('winHints'),
   winMsg: document.getElementById('winMsg'),
   winBoard: document.getElementById('winBoard'),
   replayBtn: document.getElementById('replayBtn'),
@@ -36,7 +38,7 @@ const els = {
 
 els.replayBtn.href = '/play.html?level=' + encodeURIComponent(levelId);
 
-const state = { total: 0, found: new Set(), misses: 0, startTime: null, timerId: null, finished: false };
+const state = { total: 0, found: new Set(), misses: 0, hints: 0, startTime: null, timerId: null, finished: false };
 
 function fmtTime(ms) {
   const t = Math.floor(ms / 1000);
@@ -63,6 +65,7 @@ function updateScore() {
   els.foundCount.textContent = state.found.size;
   els.totalCount.textContent = state.found.size >= state.total ? String(state.total) : '?';
   els.missCount.textContent = state.misses;
+  els.hintCount.textContent = state.hints;
 }
 
 function addMarker(box) {
@@ -151,6 +154,8 @@ async function showHint() {
     });
     const data = await res.json();
     if (data.hasHint) {
+      state.hints += 1;
+      updateScore();
       els.hintBanner.textContent = '💡 ' + data.hint;
     } else {
       els.hintBanner.textContent = state.found.size >= state.total
@@ -174,18 +179,19 @@ async function finish() {
   els.winName.textContent = nickname;
   els.winTime.textContent = fmtTime(elapsed);
   els.winMiss.textContent = state.misses;
+  els.winHints.textContent = state.hints;
   try {
     const res = await fetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ levelId, nickname, timeMs: elapsed, found: state.found.size, misses: state.misses }),
+      body: JSON.stringify({ levelId, nickname, timeMs: elapsed, found: state.found.size, misses: state.misses, hints: state.hints }),
     });
     const data = await res.json();
     els.winMsg.textContent = data.ok ? 'Your time was added to the scoreboard!' : (data.error || '');
   } catch {
     els.winMsg.textContent = 'Could not save your score (offline?).';
   }
-  await renderBoard(els.winBoard, { timeMs: elapsed, misses: state.misses });
+  await renderBoard(els.winBoard, { timeMs: elapsed, misses: state.misses, hints: state.hints });
   els.winOverlay.classList.remove('hidden');
 }
 
@@ -196,17 +202,19 @@ async function renderBoard(target, myRun) {
     if (!scores.length) { target.innerHTML = '<p class="hint">No scores yet — be the first!</p>'; return; }
     let myMarked = false;
     const rows = scores.map((s, i) => {
-      const isMe = !myMarked && myRun && s.nickname === nickname && s.timeMs === myRun.timeMs && s.misses === myRun.misses;
+      const isMe = !myMarked && myRun && s.nickname === nickname &&
+        s.timeMs === myRun.timeMs && s.misses === myRun.misses && (s.hints || 0) === (myRun.hints || 0);
       if (isMe) myMarked = true;
       return `<tr class="${isMe ? 'me' : ''}">
         <td class="rank">${i + 1}</td>
         <td>${escapeHtml(s.nickname)}</td>
         <td>${fmtTime(s.timeMs)}</td>
         <td>${s.misses}</td>
+        <td>${s.hints || 0}</td>
       </tr>`;
     }).join('');
     target.innerHTML = `<table class="scoreboard">
-      <thead><tr><th class="rank">#</th><th>Nickname</th><th>Time</th><th>Misses</th></tr></thead>
+      <thead><tr><th class="rank">#</th><th>Nickname</th><th>Time</th><th>Misses</th><th>Hints</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
   } catch {
     target.innerHTML = '<p class="hint">Could not load scoreboard.</p>';

@@ -12,6 +12,8 @@ const els = {
   pendingList: document.getElementById('pendingList'),
   approvedList: document.getElementById('approvedList'),
 
+  editorCard: document.getElementById('editorCard'),
+  editorTitle: document.getElementById('editorTitle'),
   name: document.getElementById('levelName'),
   fileInput: document.getElementById('fileInput'),
   uploadBtn: document.getElementById('uploadBtn'),
@@ -23,12 +25,15 @@ const els = {
   objList: document.getElementById('objList'),
   createBtn: document.getElementById('createBtn'),
   clearBtn: document.getElementById('clearBtn'),
+  cancelEditBtn: document.getElementById('cancelEditBtn'),
   createMsg: document.getElementById('createMsg'),
 };
 
 let password = sessionStorage.getItem('adminPassword') || '';
 let imageUrl = '';
 let tool = null;
+let editingId = null; // set while editing an existing level
+let allLevels = [];   // last fetched full level list (admin view)
 
 function authHeaders(extra = {}) {
   return { 'x-admin-password': password, ...extra };
@@ -84,6 +89,7 @@ async function loadLevels() {
     const res = await fetch('/api/admin/levels', { headers: authHeaders() });
     levels = await res.json();
   } catch { /* ignore */ }
+  allLevels = levels;
 
   const pending = levels.filter((l) => l.status === 'pending');
   const approved = levels.filter((l) => l.status === 'approved');
@@ -105,7 +111,8 @@ function card(l, isPending) {
   const actions = isPending
     ? `<button class="btn-success" data-approve="${l.id}">Approve</button>
        <button class="btn-danger" data-reject="${l.id}">Reject</button>`
-    : `<button class="btn-secondary" data-reset="${l.id}">Reset scores</button>
+    : `<button class="btn-secondary" data-edit="${l.id}">✏️ Edit</button>
+       <button class="btn-secondary" data-reset="${l.id}">Reset scores</button>
        <button class="btn-danger" data-delete="${l.id}">Delete</button>`;
   return `<div class="admin-card">
     <div class="admin-thumb"><img src="${escapeHtml(l.imageUrl)}" loading="lazy" alt="" /></div>
@@ -130,9 +137,47 @@ function bindActions() {
     b.addEventListener('click', () => { if (confirm('Delete this level and its scores?')) call('/api/admin/levels/' + b.dataset.delete, 'DELETE'); }));
   els.adminPanel.querySelectorAll('[data-reset]').forEach((b) =>
     b.addEventListener('click', () => { if (confirm('Clear this level\'s scoreboard?')) call('/api/admin/reset-scoreboard?level=' + b.dataset.reset); }));
+  els.adminPanel.querySelectorAll('[data-edit]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const level = allLevels.find((l) => l.id === b.dataset.edit);
+      if (level) enterEditMode(level);
+    }));
 }
 
-// ---------- create a level ----------
+// ---------- create / edit a level ----------
+
+function enterEditMode(level) {
+  editingId = level.id;
+  imageUrl = level.imageUrl;
+  els.name.value = level.name;
+  tool.setObjects(level.objects);
+  els.img.src = level.imageUrl;
+  els.stage.style.display = 'inline-block';
+  els.emptyState.style.display = 'none';
+  els.editorTitle.textContent = `✏️ Editing "${level.name}"`;
+  els.createBtn.textContent = '💾 Save changes';
+  els.cancelEditBtn.classList.remove('hidden');
+  els.createMsg.textContent = '';
+  els.uploadMsg.textContent = '';
+  els.editorCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function exitEditMode() {
+  editingId = null;
+  imageUrl = '';
+  els.name.value = '';
+  tool.clear();
+  els.stage.style.display = 'none';
+  els.emptyState.style.display = 'block';
+  els.editorTitle.textContent = '➕ Create a level (auto-approved)';
+  els.createBtn.textContent = '💾 Create level';
+  els.cancelEditBtn.classList.add('hidden');
+  els.fileInput.value = '';
+  els.uploadMsg.textContent = '';
+  els.createMsg.textContent = '';
+}
+
+els.cancelEditBtn.addEventListener('click', exitEditMode);
 
 els.uploadBtn.addEventListener('click', async () => {
   const file = els.fileInput.files[0];
@@ -170,26 +215,31 @@ els.createBtn.addEventListener('click', async () => {
   if (!imageUrl) { els.createMsg.textContent = 'Upload an image first.'; els.createMsg.className = 'msg error'; return; }
   if (!objects.length) { els.createMsg.textContent = 'Mark at least one hidden object.'; els.createMsg.className = 'msg error'; return; }
 
-  els.createMsg.textContent = 'Saving…';
+  const isEdit = !!editingId;
+  els.createMsg.textContent = isEdit ? 'Saving changes…' : 'Saving…';
   els.createMsg.className = 'msg';
   try {
-    const res = await fetch('/api/admin/levels', {
-      method: 'POST',
+    const res = await fetch(isEdit ? '/api/admin/levels/' + editingId : '/api/admin/levels', {
+      method: isEdit ? 'PUT' : 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ name, imageUrl, objects }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Save failed.');
-    els.createMsg.textContent = `Created "${name}"! It's live now.`;
+    if (isEdit) {
+      exitEditMode();
+      els.createMsg.textContent = `Saved changes to "${name}".`;
+    } else {
+      els.name.value = '';
+      imageUrl = '';
+      tool.clear();
+      els.stage.style.display = 'none';
+      els.emptyState.style.display = 'block';
+      els.fileInput.value = '';
+      els.uploadMsg.textContent = '';
+      els.createMsg.textContent = `Created "${name}"! It's live now.`;
+    }
     els.createMsg.className = 'msg ok';
-    // reset the form
-    els.name.value = '';
-    imageUrl = '';
-    tool.clear();
-    els.stage.style.display = 'none';
-    els.emptyState.style.display = 'block';
-    els.fileInput.value = '';
-    els.uploadMsg.textContent = '';
     loadLevels();
   } catch (err) {
     els.createMsg.textContent = err.message;

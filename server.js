@@ -104,7 +104,7 @@ function publicLevelSummary(level) {
 }
 
 // Best run per nickname for a level (fixes duplicate/replayed rows), sorted
-// by time then misses.
+// by time, then misses, then hints used.
 function levelScoreboard(levelId) {
   const best = new Map();
   for (const s of getScores()) {
@@ -113,13 +113,15 @@ function levelScoreboard(levelId) {
     const better =
       !cur ||
       s.timeMs < cur.timeMs ||
-      (s.timeMs === cur.timeMs && (s.misses || 0) < (cur.misses || 0));
+      (s.timeMs === cur.timeMs &&
+        ((s.misses || 0) < (cur.misses || 0) ||
+          ((s.misses || 0) === (cur.misses || 0) && (s.hints || 0) < (cur.hints || 0))));
     if (better) best.set(s.nickname, s);
   }
   return [...best.values()]
-    .sort((a, b) => a.timeMs - b.timeMs || (a.misses || 0) - (b.misses || 0))
+    .sort((a, b) => a.timeMs - b.timeMs || (a.misses || 0) - (b.misses || 0) || (a.hints || 0) - (b.hints || 0))
     .slice(0, 50)
-    .map((s) => ({ nickname: s.nickname, timeMs: s.timeMs, misses: s.misses || 0 }));
+    .map((s) => ({ nickname: s.nickname, timeMs: s.timeMs, misses: s.misses || 0, hints: s.hints || 0 }));
 }
 
 function removeUpload(imageUrl) {
@@ -223,7 +225,7 @@ app.post('/api/check', (req, res) => {
   res.json({ hit: false });
 });
 
-// Submit a finished run. Body: { levelId, nickname, timeMs, found, misses }.
+// Submit a finished run. Body: { levelId, nickname, timeMs, found, misses, hints }.
 app.post('/api/score', (req, res) => {
   const level = getLevels().find((l) => l.id === req.body.levelId && l.status === 'approved');
   if (!level) return res.status(404).json({ error: 'Level not found.' });
@@ -232,6 +234,7 @@ app.post('/api/score', (req, res) => {
   const timeMs = Number(req.body.timeMs);
   const found = Number(req.body.found);
   const misses = Math.max(0, Math.floor(Number(req.body.misses) || 0));
+  const hints = Math.max(0, Math.floor(Number(req.body.hints) || 0));
   const total = level.objects.length;
 
   if (!nickname) return res.status(400).json({ error: 'Nickname is required.' });
@@ -244,6 +247,7 @@ app.post('/api/score', (req, res) => {
     nickname,
     timeMs,
     misses,
+    hints,
     found,
     total,
     date: new Date().toISOString(),
@@ -346,6 +350,29 @@ app.post('/api/admin/levels', requireAdmin, (req, res) => {
   levels.push(level);
   saveLevels(levels);
   res.json({ ok: true, id: level.id });
+});
+
+// Edit an existing level's name, image, and/or objects. Keeps its id, status,
+// and creator; replaces the stored image file if a different one was uploaded.
+app.put('/api/admin/levels/:id', requireAdmin, (req, res) => {
+  const levels = getLevels();
+  const level = levels.find((l) => l.id === req.params.id);
+  if (!level) return res.status(404).json({ error: 'Level not found.' });
+
+  const name = String(req.body.name || '').trim().slice(0, 60);
+  const imageUrl = String(req.body.imageUrl || '');
+  const objects = cleanObjects(req.body.objects);
+  if (!name) return res.status(400).json({ error: 'Name is required.' });
+  if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required.' });
+  if (!objects.length) return res.status(400).json({ error: 'Mark at least one hidden object.' });
+
+  if (imageUrl !== level.imageUrl) removeUpload(level.imageUrl);
+  level.name = name;
+  level.imageUrl = imageUrl;
+  level.objects = objects;
+  level.updatedAt = new Date().toISOString();
+  saveLevels(levels);
+  res.json({ ok: true });
 });
 
 app.post('/api/admin/levels/:id/approve', requireAdmin, (req, res) => {

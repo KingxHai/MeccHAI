@@ -27,9 +27,9 @@ it's shared across all visitors and devices.
   zoom level.
 - **Hint button** — asks the server for a clue for one not-yet-found object
   (only for objects the creator gave a hint).
-- **Per-level scoreboard** showing `nickname · time · misses`, fastest first
-  (ties broken by fewest misses), keeping only each player's **best** run, with
-  your own run highlighted.
+- **Per-level scoreboard** showing `nickname · time · misses · hints used`,
+  fastest first (ties broken by fewest misses, then fewest hints), keeping only
+  each player's **best** run, with your own run highlighted.
 - Clicking a hidden object drops a green marker; clicking empty space shows a
   small "miss" ripple. The name of a found object is **not** revealed to players.
 
@@ -43,6 +43,8 @@ before they appear in the browse list. Marking works with mouse and touch.
 - Password-protected.
 - **Approve / reject** pending player submissions.
 - **Create levels** directly (auto-approved): upload, name, and mark objects.
+- **Edit** any live level — click it to change its name, image, and hidden
+  objects/hints, or add/remove objects.
 - **Delete** any level, or **reset** an individual level's scoreboard.
 - Images are stored full quality; Apple **HEIC/HEIF** photos (the default iPhone
   format) are automatically converted to high-quality JPEG on upload, since most
@@ -177,6 +179,7 @@ data/                levels.json + scoreboard.json (gitignored)
 | POST   | `/api/admin/login`                  | admin | Verify the admin password                        |
 | GET    | `/api/admin/levels`                 | admin | All levels incl. pending + coordinates           |
 | POST   | `/api/admin/levels`                 | admin | Create a level (auto-approved)                   |
+| PUT    | `/api/admin/levels/:id`             | admin | Edit a level's name, image, and/or objects       |
 | POST   | `/api/admin/levels/:id/approve`     | admin | Approve a pending submission                     |
 | POST   | `/api/admin/levels/:id/reject`      | admin | Reject (delete) a pending submission             |
 | DELETE | `/api/admin/levels/:id`             | admin | Delete a level (and its scores/image)            |
