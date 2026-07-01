@@ -25,13 +25,15 @@ it's shared across all visitors and devices.
 - **Zoom & pan** — zoom buttons plus mouse wheel (desktop) and pinch (mobile),
   and drag to pan when zoomed in. Tapping still finds objects accurately at any
   zoom level.
-- **Hint button** — asks the server for a clue for one not-yet-found object
-  (only for objects the creator gave a hint).
+- **Hint button** — asks the server for a clue for the next not-yet-found
+  object, in marking order (object 1, then 2, ...), skipping ones already
+  found (only objects the creator gave a hint have one).
 - **Per-level scoreboard** showing `nickname · time · misses · hints used`,
   fastest first (ties broken by fewest misses, then fewest hints), keeping only
   each player's **best** run, with your own run highlighted.
-- Clicking a hidden object drops a green marker; clicking empty space shows a
-  small "miss" ripple. The name of a found object is **not** revealed to players.
+- Clicking a hidden object drops a green marker with its name, faded so it
+  doesn't clutter the hunt — hover (or tap, on touch) a name to bring it to full
+  opacity. Clicking empty space shows a small "miss" ripple.
 
 ### Create a level (`/submit.html`)
 Any player can create a level: upload an image, name it, and drag rectangles over
@@ -53,8 +55,9 @@ before they appear in the browse list. Marking works with mouse and touch.
 ### Anti-cheat
 Object coordinates and the object count are **never** sent to the player's
 browser up front. Each click is verified server-side (`POST /api/check`), and
-only a found object's location is returned — so players can't read the answers
-(or how many remain) from the network or devtools.
+only a found object's location and name are returned — so players can't read
+the remaining answers (or how many objects are left) from the network or
+devtools.
 
 ## Getting started
 

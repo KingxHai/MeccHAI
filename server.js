@@ -219,7 +219,12 @@ app.post('/api/check', (req, res) => {
   }
   for (const obj of level.objects) {
     if (x >= obj.x && x <= obj.x + obj.w && y >= obj.y && y <= obj.y + obj.h) {
-      return res.json({ hit: true, id: obj.id, box: { x: obj.x, y: obj.y, w: obj.w, h: obj.h } });
+      return res.json({
+        hit: true,
+        id: obj.id,
+        label: obj.label || '',
+        box: { x: obj.x, y: obj.y, w: obj.w, h: obj.h },
+      });
     }
   }
   res.json({ hit: false });
@@ -260,16 +265,16 @@ app.get('/api/scoreboard/:levelId', (req, res) => {
   res.json(levelScoreboard(req.params.levelId));
 });
 
-// Ask for a hint. Body: { levelId, foundIds: [] }. Returns the hint text for a
-// random not-yet-found object that has one. Kept server-side so hints aren't all
-// exposed up front.
+// Ask for a hint. Body: { levelId, foundIds: [] }. Returns the hint text for
+// the next not-yet-found object (in marking order, i.e. object 1, then 2, ...),
+// skipping any already found. Kept server-side so hints aren't all exposed up front.
 app.post('/api/hint', (req, res) => {
   const level = getLevels().find((l) => l.id === req.body.levelId && l.status === 'approved');
   if (!level) return res.status(404).json({ error: 'Level not found.' });
   const found = new Set(Array.isArray(req.body.foundIds) ? req.body.foundIds : []);
   const candidates = level.objects.filter((o) => !found.has(o.id) && o.hint && o.hint.trim());
   if (!candidates.length) return res.json({ hasHint: false });
-  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  const pick = candidates[0];
   res.json({ hasHint: true, hint: pick.hint, remaining: candidates.length });
 });
 

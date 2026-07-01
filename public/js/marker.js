@@ -42,7 +42,7 @@ window.createMarkerTool = function ({ stage, img, list, count }) {
 
       const nameInput = document.createElement('input');
       nameInput.type = 'text';
-      nameInput.placeholder = 'Optional name (only you see this)';
+      nameInput.placeholder = 'Optional name (shown on the marker once found)';
       nameInput.value = o.label || '';
       nameInput.addEventListener('input', () => { o.label = nameInput.value; });
 

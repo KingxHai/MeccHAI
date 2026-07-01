@@ -68,13 +68,26 @@ function updateScore() {
   els.hintCount.textContent = state.hints;
 }
 
-function addMarker(box) {
+function addMarker(box, label) {
   const m = document.createElement('div');
   m.className = 'marker';
   m.style.left = box.x * 100 + '%';
   m.style.top = box.y * 100 + '%';
   m.style.width = box.w * 100 + '%';
   m.style.height = box.h * 100 + '%';
+  if (label) {
+    const tag = document.createElement('span');
+    tag.className = 'marker-tag';
+    tag.textContent = label;
+    // Stop the tag's own taps from being read as pan/find gestures by the
+    // zoom controller; on touch (no real hover) tapping the tag toggles it solid.
+    tag.addEventListener('pointerdown', (e) => e.stopPropagation());
+    tag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tag.classList.toggle('solid');
+    });
+    m.appendChild(tag);
+  }
   els.stage.appendChild(m);
 }
 function showMiss(nx, ny) {
@@ -103,7 +116,7 @@ async function handleTap(clientX, clientY) {
     if (data.hit) {
       if (state.found.has(data.id)) return;
       state.found.add(data.id);
-      addMarker(data.box);
+      addMarker(data.box, data.label);
       updateScore();
       if (state.found.size >= state.total) finish();
     } else {

@@ -224,6 +224,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border-radius: 6px;
   white-space: nowrap;
   line-height: 1.2;
+  /* Kept faint by default so revealed names don't clutter the hunt; hovering
+     (or tapping, on touch) brings a name to full opacity to actually read it. */
+  opacity: 0.32;
+  transition: opacity 0.15s ease;
+  pointer-events: auto;
+  cursor: default;
+}
+.marker .marker-tag:hover,
+.marker .marker-tag.solid {
+  opacity: 1;
 }
 @keyframes pop { from { transform: scale(1.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
