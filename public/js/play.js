@@ -35,6 +35,10 @@ const els = {
   winBoard: document.getElementById('winBoard'),
   replayBtn: document.getElementById('replayBtn'),
   giveUpBtn: document.getElementById('giveUpBtn'),
+  giveupConfirmOverlay: document.getElementById('giveupConfirmOverlay'),
+  giveupConfirmMsg: document.getElementById('giveupConfirmMsg'),
+  giveupConfirmYes: document.getElementById('giveupConfirmYes'),
+  giveupConfirmNo: document.getElementById('giveupConfirmNo'),
   giveupOverlay: document.getElementById('giveupOverlay'),
   giveupName: document.getElementById('giveupName'),
   giveupScore: document.getElementById('giveupScore'),
@@ -225,9 +229,16 @@ async function finish() {
   els.winOverlay.classList.remove('hidden');
 }
 
-async function giveUp() {
+function askGiveUp() {
   if (state.finished || !state.startTime) return;
-  if (!confirm(`Give up? You've found ${state.found.size} so far, and the rest will be revealed.`)) return;
+  els.giveupConfirmMsg.textContent =
+    `You've found ${state.found.size} so far, and the rest will be revealed.`;
+  els.giveupConfirmOverlay.classList.remove('hidden');
+}
+
+async function giveUp() {
+  els.giveupConfirmOverlay.classList.add('hidden');
+  if (state.finished || !state.startTime) return;
 
   state.finished = true;
   stopTimer();
@@ -284,7 +295,10 @@ async function renderBoard(target, myRun) {
 
 // ----- wiring -----
 els.hintBtn.addEventListener('click', showHint);
-els.giveUpBtn.addEventListener('click', giveUp);
+els.giveUpBtn.addEventListener('click', askGiveUp);
+els.giveupConfirmYes.addEventListener('click', giveUp);
+els.giveupConfirmNo.addEventListener('click', () => els.giveupConfirmOverlay.classList.add('hidden'));
+els.giveupConfirmOverlay.addEventListener('click', (e) => { if (e.target === els.giveupConfirmOverlay) els.giveupConfirmOverlay.classList.add('hidden'); });
 els.zoomInBtn.addEventListener('click', () => zoom && zoom.zoomIn());
 els.zoomOutBtn.addEventListener('click', () => zoom && zoom.zoomOut());
 els.zoomResetBtn.addEventListener('click', () => zoom && zoom.reset());
