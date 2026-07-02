@@ -165,6 +165,14 @@ function removeUpload(imageUrl) {
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
+// Level data, scoreboards, etc. change whenever an admin edits something —
+// never let a browser or proxy reuse a cached API response instead of
+// hitting the server fresh.
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 // Cache-busting: relying on Cache-Control alone means a browser (or an
 // in-between proxy) that already cached an old script keeps using it even
 // after a deploy, until something prompts a real revalidation — which is

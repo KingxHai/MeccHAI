@@ -105,6 +105,17 @@ script can never accidentally keep using it after you deploy a new image —
 the URL itself changes. After updating the container, a normal page reload
 is enough; no need to hunt for a hard-refresh.
 
+**Editing a level is safe from stale caching too, automatically:**
+- Every uploaded image gets a brand-new, random filename — editing/replacing
+  a level's picture always produces a URL nobody's browser has seen before,
+  so there's nothing to be cached stale in the first place.
+- All `/api/*` responses (level lists, scoreboards, etc.) are sent with
+  `Cache-Control: no-store`, so a fresh page load (browsing to a level,
+  hitting "Play again") always reflects the latest edit — no manual refresh
+  needed. The one thing this can't do is push an update into a browser tab
+  a player already has *open mid-game* on that level — that would need a
+  live-sync feature (polling or WebSockets), which isn't implemented.
+
 ## Run with Docker
 
 The whole app is a single container. Persistent data (uploaded images, game
